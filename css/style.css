@@ -172,6 +172,10 @@ a{ color: inherit; text-decoration: none; }
 }
 .service-detail--alt .service-detail-grid{ grid-template-columns: .9fr 1.4fr; }
 .service-detail-copy .lede{ max-width: 56ch; }
+.service-detail-photo{
+  width:100%; aspect-ratio: 3/2; object-fit: cover; object-position: 50% 30%;
+  border-radius: var(--radius); margin: 8px 0 28px;
+}
 
 .technique-list{ display:flex; flex-direction:column; gap:20px; margin: 22px 0 4px; }
 .technique h4{
