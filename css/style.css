@@ -167,6 +167,17 @@ a{ color: inherit; text-decoration: none; }
 .more-toggle[aria-expanded="true"] .more-icon{ transform: rotate(45deg); }
 .more-content{ margin-bottom: 6px; }
 .more-content p{ font-size:.95rem; }
+.more-heading{
+  font-family: var(--sans); font-weight:700; font-size:.85rem;
+  color: var(--ink); margin: 18px 0 10px;
+}
+.training-list{ list-style:none; padding:0; margin: 0; display:grid; gap:10px; }
+.training-list li{
+  position:relative; padding-left: 20px; color: var(--ink-soft); font-size:.88rem; line-height:1.5;
+}
+.training-list li::before{
+  content:"–"; position:absolute; left:0; color: var(--accent-1); font-weight:700;
+}
 
 .who-list{ list-style:none; padding:0; margin: 22px 0 0; display:grid; gap:12px; }
 .who-list li{
