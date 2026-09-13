@@ -14,17 +14,6 @@ if (navToggle && mainNav) {
   });
 }
 
-// "Mehr über mich" toggle
-const moreToggle = document.getElementById('more-toggle');
-const moreContent = document.getElementById('more-content');
-if (moreToggle && moreContent) {
-  moreToggle.addEventListener('click', () => {
-    const isOpen = moreToggle.getAttribute('aria-expanded') === 'true';
-    moreToggle.setAttribute('aria-expanded', String(!isOpen));
-    moreContent.hidden = isOpen;
-  });
-}
-
 // FAQ accordion
 document.querySelectorAll('.accordion-trigger').forEach(trigger => {
   trigger.addEventListener('click', () => {
