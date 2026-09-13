@@ -178,39 +178,46 @@ a{ color: inherit; text-decoration: none; }
   background: var(--grad);
 }
 
-/* Services */
-.services{ padding: 70px 0; border-top:1px solid var(--line); }
-.service-cards{
-  display:grid; grid-template-columns: repeat(2,1fr); gap: 28px; margin: 40px 0 36px;
+/* Service detail sections (Massage / Yoga, each its own full-width block) */
+.service-detail{
+  padding: 76px 0; border-top:1px solid var(--line); scroll-margin-top: 78px;
 }
-.service-card{ scroll-margin-top: 90px;
+.service-detail-grid{
+  display:grid; grid-template-columns: 1.4fr .9fr; gap: 56px; align-items:start;
+}
+.service-detail--alt .service-detail-grid{ grid-template-columns: .9fr 1.4fr; }
+.service-detail-copy .lede{ max-width: 56ch; }
+
+.technique-list{ display:flex; flex-direction:column; gap:20px; margin: 22px 0 4px; }
+.technique h4{
+  font-family: var(--sans); font-size:.95rem; font-weight:700; color: var(--ink);
+  margin: 0 0 5px;
+}
+.technique p{ font-size:.92rem; margin:0; max-width: 56ch; }
+
+.service-panel{
   background: var(--bg-card);
   border-radius: var(--radius);
-  padding: 34px 32px;
   border: 1px solid var(--line);
-  display:flex; flex-direction:column;
+  padding: 36px 32px;
+  text-align:center;
+  position: sticky; top: 96px;
 }
-.service-icon{ width:34px; height:34px; border-radius:8px; margin-bottom:18px; }
-.service-time{
-  font-family: var(--serif); font-style: italic; color: var(--accent-1);
-  font-size:.95rem; font-weight:600; margin-bottom: 6px;
+.service-panel-icon{ width:44px; height:44px; border-radius:10px; margin: 0 auto 18px; }
+.service-panel-time{
+  font-family: var(--serif); font-style: italic; color: var(--ink-soft);
+  font-size:1rem; margin-bottom: 4px;
 }
-.service-card p{ font-size:.95rem; }
+.service-panel-price{
+  font-family: var(--serif); font-size:2.2rem; color: var(--accent-1); font-weight:600;
+  margin-bottom: 20px;
+}
+.service-panel .btn{ width:100%; justify-content:center; }
+.service-panel-note{ font-size:.82rem; margin: 14px 0 0; }
 
-.technique-list{ display:flex; flex-direction:column; gap:18px; margin: 6px 0 4px; }
-.technique h4{
-  font-family: var(--sans); font-size:.92rem; font-weight:700; color: var(--ink);
-  margin: 0 0 4px;
-}
-.technique p{ font-size:.9rem; margin:0; }
-
-.service-foot{
-  display:flex; align-items:center; justify-content:space-between;
-  margin-top: auto; padding-top: 20px; border-top:1px solid var(--line);
-}
-.price{ font-family: var(--serif); font-size:1.6rem; color: var(--accent-1); font-weight:600; }
-
-.services-cta{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; scroll-margin-top: 90px; }
+/* Shared booking CTA */
+.services-cta-section{ padding: 64px 0 76px; border-top:1px solid var(--line); scroll-margin-top: 78px; }
+.services-cta{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top: 28px; }
 
 /* Info strip */
 .info-strip{ background: var(--grad); padding: 26px 0; }
@@ -287,7 +294,9 @@ a{ color: inherit; text-decoration: none; }
   .hero-grid, .about-grid{ grid-template-columns: 1fr; }
   .about-media{ order:-1; max-width: 320px; margin: 0 auto; }
   .principle-grid{ grid-template-columns: 1fr; gap: 30px; }
-  .service-cards{ grid-template-columns: 1fr; }
+  .service-detail{ padding: 56px 0; }
+  .service-detail-grid, .service-detail--alt .service-detail-grid{ grid-template-columns: 1fr; gap: 32px; }
+  .service-panel{ order:-1; position:static; max-width: 340px; margin: 0 auto; }
   .footer-inner{ grid-template-columns: 1fr; gap: 30px; }
   .info-strip-inner{ flex-direction:column; text-align:center; }
 }
