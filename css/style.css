@@ -215,10 +215,11 @@ a{ color: inherit; text-decoration: none; }
 .services-cta{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top: 28px; }
 
 /* Info strip */
-.info-strip{ background: var(--grad); padding: 56px 0; }
+.info-strip{ background: linear-gradient(rgba(0,0,0,.22), rgba(0,0,0,.22)), var(--grad); padding: 56px 0; }
 .info-strip-inner{
   display:flex; flex-direction:column; align-items:center; gap:10px;
   color: var(--white); font-size:.95rem; text-align:center;
+  text-shadow: 0 1px 3px rgba(0,0,0,.3);
 }
 .info-strip-logo{ height:84px; width:auto; }
 .info-strip-lagom{
