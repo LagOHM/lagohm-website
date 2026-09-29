@@ -44,6 +44,7 @@ h2{ font-size: clamp(1.7rem, 3.2vw, 2.4rem); }
 h3{ font-size: 1.25rem; margin-bottom: 10px; }
 
 p{ margin: 0 0 16px; color: var(--ink-soft); }
+.lede strong, .about-copy p strong, .service-detail-copy p strong{ color: var(--ink); font-weight: 700; }
 .lede{ font-size: 1.08rem; max-width: 46ch; }
 .center{ text-align:center; margin-left:auto; margin-right:auto; }
 h2.center, .eyebrow.center, .lede.center{ text-align:center; }
