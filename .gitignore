@@ -1,0 +1,6 @@
+# Server-only secrets, created directly on the Netcup server, never in git.
+config.php
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

@@ -1,0 +1,41 @@
+name: Deploy to Netcup
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: PHP syntax check (if any .php files exist)
+        run: |
+          shopt -s globstar nullglob
+          files=(**/*.php)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No .php files yet, skipping."
+          else
+            for f in "${files[@]}"; do php -l "$f"; done
+          fi
+
+      - name: Deploy via SSH (git pull on server)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.NETCUP_SSH_HOST }}
+          username: ${{ secrets.NETCUP_SSH_USER }}
+          password: ${{ secrets.NETCUP_SSH_PASSWORD }}
+          port: 22
+          script: |
+            set -e
+            cd ~/lagohm.de/httpdocs
+            git fetch origin main
+            git reset --hard origin/main
+
+      - name: Smoke test
+        run: |
+          sleep 5
+          curl -fsS -o /dev/null https://lagohm.de/
