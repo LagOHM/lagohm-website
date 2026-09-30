@@ -22,18 +22,43 @@ Passwort aus Schritt 1 eingeben. Danach im Server-Terminal:
 ```bash
 cd ~/lagohm.de
 mv httpdocs httpdocs_alt
-git clone https://github.com/LagOHM/lagohm-website.git httpdocs
 ```
 
-Das sichert eventuell vorhandene Platzhalter-Dateien in `httpdocs_alt` (kann später gelöscht werden) und lädt die echte Website hinein.
-
-Kurzer Check, ob es geklappt hat:
+**Wichtig:** Auf diesem Netcup-Server ist `git clone https://...` kaputt (fehlende Systembibliothek `libngtcp2_crypto_gnutls.so.8` im Server-Image — ein Netcup-seitiges Problem, kein Fehler unsererseits). Deshalb läuft der Zugriff auf GitHub stattdessen über einen SSH-Schlüssel (Deploy Key), nicht über HTTPS:
 
 ```bash
+mkdir -p -m 700 ~/.ssh
+ssh-keygen -t ed25519 -C "lagohm-deploy" -f ~/.ssh/github_deploy_key -N ""
+cat ~/.ssh/github_deploy_key.pub
+```
+
+Den ausgegebenen Schlüssel (beginnt mit `ssh-ed25519 ...`) kopieren und bei `https://github.com/LagOHM/lagohm-website/settings/keys` → „Add deploy key" einfügen (Titel z. B. „Netcup Server", **„Allow write access" NICHT ankreuzen**, da nur Lesezugriff nötig ist).
+
+Danach im Terminal:
+
+```bash
+cat >> ~/.ssh/config << 'EOF'
+Host github.com
+  User git
+  IdentityFile ~/.ssh/github_deploy_key
+  IdentitiesOnly yes
+  StrictHostKeyChecking accept-new
+EOF
+chmod 600 ~/.ssh/config
+
+ssh -T git@github.com
+```
+
+Bei Erfolg erscheint „Hi LagOHM/lagohm-website! You've successfully authenticated, but GitHub does not provide shell access." Dann klonen:
+
+```bash
+git clone git@github.com:LagOHM/lagohm-website.git httpdocs
 ls httpdocs
 ```
 
 Es sollten `index.html`, `css/`, `js/`, `images/` usw. auftauchen. Danach `exit` zum Verlassen der SSH-Verbindung.
+
+Der GitHub-Actions-Workflow (`.github/workflows/deploy.yml`) SSHt separat mit Passwort in den Server (Schritt 3) und führt dort `git fetch`/`git reset` aus — das nutzt automatisch denselben Deploy Key, weil der Server dafür lokal konfiguriert ist. Keine weitere Einrichtung nötig.
 
 ## 3. GitHub Secrets eintragen
 
