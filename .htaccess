@@ -1,0 +1,11 @@
+# Without explicit cache headers, browsers (Safari on iPhone in particular) keep showing
+# stale pages after a deploy. Pages, styles and scripts: always revalidate (cheap 304 via ETag).
+# Fonts never change: cache for a year.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|css|js)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  <FilesMatch "\.woff2$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>

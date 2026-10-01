@@ -27,15 +27,15 @@ if (!is_array($input)) {
 
 // --- Spam defenses ---
 if (!Csrf::verify($input['csrf_token'] ?? null)) {
-    fail(403, 'Invalid or missing CSRF token');
+    fail(403, 'Die Seite war zu lange offen. Bitte lade sie neu und versuch es nochmal.');
 }
 if (!empty($input['website'])) {
     // Honeypot field; bots fill it, humans never see it.
-    fail(400, 'Invalid submission');
+    fail(400, 'Die Buchung konnte nicht abgeschickt werden. Bitte lade die Seite neu und versuch es nochmal.');
 }
 $renderedAt = (float)($input['form_rendered_at'] ?? 0);
 if ($renderedAt <= 0 || (microtime(true) - $renderedAt) < 3.0) {
-    fail(400, 'Invalid submission');
+    fail(400, 'Die Buchung konnte nicht abgeschickt werden. Bitte lade die Seite neu und versuch es nochmal.');
 }
 
 $pdo = lagohm_db();
@@ -52,45 +52,53 @@ $note = trim((string)($input['note'] ?? ''));
 $consent = !empty($input['gdpr_consent']);
 
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateStr) || !preg_match('/^\d{2}:\d{2}$/', $timeStr)) {
-    fail(400, 'Invalid date/time');
+    fail(400, 'Bitte wähle Datum und Uhrzeit aus.');
 }
 if ($name === '' || mb_strlen($name) > 150) {
-    fail(400, 'Please provide your name');
+    fail(400, 'Bitte gib deinen Namen an.');
 }
 if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 190) {
-    fail(400, 'Please provide a valid email address');
+    fail(400, 'Bitte gib eine gültige E-Mail-Adresse an.');
+}
+// Catch typos like "gmail.vom": the domain must exist and be able to receive mail.
+$emailDomain = substr(strrchr($email, '@'), 1);
+if (function_exists('idn_to_ascii')) {
+    $emailDomain = idn_to_ascii($emailDomain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46) ?: $emailDomain;
+}
+if (!checkdnsrr($emailDomain . '.', 'MX') && !checkdnsrr($emailDomain . '.', 'A') && !checkdnsrr($emailDomain . '.', 'AAAA')) {
+    fail(400, 'Die E-Mail-Adresse scheint nicht zu existieren (' . $emailDomain . '). Bitte prüf sie auf Tippfehler.');
 }
 if (mb_strlen($phone) > 40) {
-    fail(400, 'Phone number too long');
+    fail(400, 'Die Telefonnummer ist zu lang.');
 }
 if (mb_strlen($note) > 2000) {
-    fail(400, 'Note too long');
+    fail(400, 'Die Nachricht ist zu lang (höchstens 2000 Zeichen).');
 }
 if (!$consent) {
-    fail(400, 'Please accept the privacy policy');
+    fail(400, 'Bitte bestätige, dass du die Datenschutzerklärung gelesen hast.');
 }
 
 $service = Availability::getService($pdo, $serviceSlug);
 if (!$service) {
-    fail(404, 'Unknown service');
+    fail(404, 'Bitte wähle eine Leistung aus.');
 }
 
 // --- Rate limiting ---
 $rl = $pdo->prepare('SELECT COUNT(*) AS c FROM bookings WHERE ip_address = ? AND created_at > (NOW() - INTERVAL 1 HOUR)');
 $rl->execute([$ip]);
 if ((int)$rl->fetch()['c'] >= 3) {
-    fail(429, 'Too many requests, please try again later');
+    fail(429, 'Von hier wurden gerade schon mehrere Buchungen abgeschickt. Bitte versuch es später nochmal oder schreib mir direkt.');
 }
 $rl2 = $pdo->prepare('SELECT COUNT(*) AS c FROM bookings WHERE customer_email = ? AND created_at > (NOW() - INTERVAL 1 DAY)');
 $rl2->execute([$email]);
 if ((int)$rl2->fetch()['c'] >= 5) {
-    fail(429, 'Too many requests, please try again later');
+    fail(429, 'Von hier wurden gerade schon mehrere Buchungen abgeschickt. Bitte versuch es später nochmal oder schreib mir direkt.');
 }
 
 $tz = new DateTimeZone(lagohm_config()['app']['timezone'] ?? 'Europe/Berlin');
 $start = DateTime::createFromFormat('Y-m-d H:i', "$dateStr $timeStr", $tz);
 if (!$start) {
-    fail(400, 'Invalid date/time');
+    fail(400, 'Bitte wähle Datum und Uhrzeit aus.');
 }
 $end = (clone $start)->modify('+' . (int)$service['duration_minutes'] . ' minutes');
 
@@ -101,7 +109,7 @@ $pdo->beginTransaction();
 try {
     if (!Availability::isSlotStillAvailable($pdo, $service, $start, $end)) {
         $pdo->rollBack();
-        fail(409, 'This slot is no longer available. Please pick another one.');
+        fail(409, 'Dieser Termin ist leider gerade nicht mehr frei. Bitte wähle eine andere Zeit.');
     }
 
     $cancellationToken = bin2hex(random_bytes(32));
@@ -131,7 +139,7 @@ try {
     fail(503, 'Buchen ist gerade kurz nicht möglich. Bitte versuch es in ein paar Minuten nochmal.');
 } catch (Throwable $e) {
     $pdo->rollBack();
-    fail(500, 'Could not create booking');
+    fail(500, 'Die Buchung konnte nicht gespeichert werden. Bitte versuch es nochmal.');
 }
 
 // --- Google Calendar event (best-effort; booking already stands regardless) ---
