@@ -66,6 +66,7 @@ header('Content-Type: text/html; charset=utf-8');
     <nav class="admin-nav">
       <a href="index.php">Buchungen</a>
       <a href="availability.php" class="active">Verfügbarkeit</a>
+      <a href="calendar.php">Kalender</a>
       <a href="settings.php">Einstellungen</a>
       <a href="logout.php">Logout</a>
     </nav>
@@ -73,7 +74,7 @@ header('Content-Type: text/html; charset=utf-8');
 </header>
 <main class="wrap admin-main">
   <h1>Wöchentliche Verfügbarkeit</h1>
-  <p class="admin-note">Das sind deine grundsätzlichen Öffnungszeiten für Buchungen. Dein privater Google Kalender blockt zusätzlich automatisch Zeiten, in denen du schon etwas anderes eingetragen hast (sobald in Phase 3 verbunden).</p>
+  <p class="admin-note">Das sind deine grundsätzlichen Öffnungszeiten für Buchungen. Dein privater Google Kalender blockt zusätzlich automatisch Zeiten, in denen du schon etwas anderes eingetragen hast (sofern unter „Kalender“ verbunden).</p>
   <?php if ($message): ?><p class="admin-success"><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
 
   <form method="post">

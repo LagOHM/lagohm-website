@@ -1,10 +1,15 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/GoogleCalendar.php';
+
 /**
  * Computes bookable start times for a service on a given date.
  * Weekday convention follows PHP's date('w'): 0=Sunday .. 6=Saturday,
  * matching availability_templates.weekday.
+ *
+ * Busy time = confirmed bookings in the DB + busy blocks from the connected Google Calendar.
+ * Throws GoogleCalendarException if Google is connected but unreachable (callers fail closed).
  */
 final class Availability
 {
@@ -127,6 +132,12 @@ final class Availability
             $start->setTimezone($tz);
             $end->setTimezone($tz);
             $intervals[] = [$start, $end];
+        }
+
+        if (GoogleCalendar::isConnected()) {
+            foreach (GoogleCalendar::busyIntervals($dayStartUtc, $dayEndUtc) as [$busyStart, $busyEnd]) {
+                $intervals[] = [(clone $busyStart)->setTimezone($tz), (clone $busyEnd)->setTimezone($tz)];
+            }
         }
         return $intervals;
     }

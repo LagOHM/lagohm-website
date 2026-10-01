@@ -23,7 +23,15 @@ if (!$service) {
     exit;
 }
 
-$slots = Availability::getAvailableSlots($pdo, $service, $date);
+try {
+    $slots = Availability::getAvailableSlots($pdo, $service, $date);
+} catch (GoogleCalendarException $e) {
+    // Can't see the private calendar right now: show nothing rather than risk a clash.
+    GoogleCalendar::reportFailure('slots', $e);
+    http_response_code(503);
+    echo json_encode(['error' => 'calendar temporarily unavailable']);
+    exit;
+}
 echo json_encode([
     'service' => $serviceSlug,
     'date' => $date,

@@ -130,3 +130,40 @@ Danach einloggen unter `https://lagohm.de/admin/login.php` — dort siehst du di
 ## Testen
 
 Sobald das erledigt ist, teste ich die API direkt per curl (`/api/slots.php`, `/api/booking-create.php`) — dafür brauche ich keinen Zugriff auf deinen Server, das läuft über die normale Website-URL.
+
+# Setup-Checkliste: Google Kalender (Phase 3)
+
+Ziel: Deine privaten Termine im Google Kalender blocken automatisch Buchungszeiten, und jede Buchung landet als Termin in deinem Kalender. Alles im Browser, kein SSH nötig. Mit dem Google-Konto einloggen, dessen Kalender du benutzt.
+
+## 1. Google-Cloud-Projekt anlegen
+
+1. `https://console.cloud.google.com` öffnen → oben links Projektauswahl → „Neues Projekt“ → Name z. B. `LagOHM Website` → Erstellen, dann das Projekt auswählen.
+2. Menü → „APIs & Dienste“ → „Bibliothek“ → nach **Google Calendar API** suchen → „Aktivieren“.
+
+## 2. OAuth-Zustimmungsbildschirm („Google Auth Platform“)
+
+1. Menü → „APIs & Dienste“ → „OAuth-Zustimmungsbildschirm“ → „Los geht’s“.
+2. App-Name `LagOHM`, Support-E-Mail = deine Adresse → Zielgruppe **Extern** → Kontaktdaten = deine Adresse → Fertigstellen.
+3. Unter „Zielgruppe“ → **„App veröffentlichen“** klicken (Status „In Produktion“). **Wichtig:** Im Status „Testen“ läuft die Verbindung nach 7 Tagen automatisch ab. Eine Google-Überprüfung ist für deinen eigenen Gebrauch nicht nötig.
+
+## 3. Zugangsdaten erstellen
+
+1. Menü → „APIs & Dienste“ → „Anmeldedaten“ → „+ Anmeldedaten erstellen“ → „OAuth-Client-ID“.
+2. Anwendungstyp **Webanwendung**, Name z. B. `lagohm.de`.
+3. Bei „Autorisierte Weiterleitungs-URIs“ genau eintragen: `https://lagohm.de/admin/oauth-callback.php`
+4. Erstellen → Client-ID und Clientschlüssel (Secret) werden angezeigt.
+
+## 4. Auf der Website verbinden
+
+1. `https://lagohm.de/admin/calendar.php` → unter „Google-Zugangsdaten“ Client-ID und Client-Secret einfügen → Speichern. (Die tippe nur du ein, ich sehe sie nie.)
+2. „Mit Google Kalender verbinden“ → Google-Konto wählen. Es erscheint „Google hat diese App nicht überprüft“ → „Erweitert“ → „Zu LagOHM wechseln (unsicher)“ — das ist bei eigenen, nicht überprüften Apps normal — → Zugriff erlauben.
+3. Zurück auf der Seite sollte stehen: „Verbunden ✓ — X belegte Zeitblöcke …“.
+4. Empfohlen: In Google Kalender einen eigenen Kalender `LagOHM Termine` anlegen (links „Weitere Kalender“ → „+“ → „Neuen Kalender erstellen“), dann auf der Admin-Seite unter „Buchungskalender“ auswählen.
+
+Voraussetzung: `encryption_key_hex` in `lib/config.php` ist gesetzt (Phase 2, Schritt 2) — damit wird der Google-Zugang verschlüsselt gespeichert.
+
+## Verhalten, gut zu wissen
+
+- Jeder Termin in deinem Hauptkalender und im Buchungskalender blockt Buchungen (plus 30 Min. Puffer). Termine, die in Google auf „Verfügbar“ stehen, blocken nicht.
+- Kann die Website Google mal nicht erreichen (oder wurde der Zugriff widerrufen), zeigt sie zur Sicherheit **keine** freien Termine an und schickt dir höchstens alle 6 Stunden eine Mail.
+- Stornieren weiterhin nur im Admin-Bereich oder über den Link der Kundin — dann wird der Google-Termin automatisch mitgelöscht.

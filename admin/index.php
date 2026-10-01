@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../lib/db.php';
 require_once __DIR__ . '/../lib/Auth.php';
 require_once __DIR__ . '/../lib/Csrf.php';
+require_once __DIR__ . '/../lib/GoogleCalendar.php';
 
 lagohm_config();
 Auth::requireLogin();
@@ -23,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_booking_id']))
         if ($upd->rowCount() > 0) {
             $log = $pdo->prepare('INSERT INTO booking_audit_log (booking_id, action, detail) VALUES (?, "cancelled", "via admin dashboard")');
             $log->execute([$id]);
+            GoogleCalendar::removeBookingEvent($id);
             $message = 'Termin storniert.';
         }
     }
@@ -52,6 +54,7 @@ header('Content-Type: text/html; charset=utf-8');
     <nav class="admin-nav">
       <a href="index.php" class="active">Buchungen</a>
       <a href="availability.php">Verfügbarkeit</a>
+      <a href="calendar.php">Kalender</a>
       <a href="settings.php">Einstellungen</a>
       <a href="logout.php">Logout (<?= htmlspecialchars($_SESSION['admin_email'] ?? '', ENT_QUOTES, 'UTF-8') ?>)</a>
     </nav>

@@ -125,9 +125,29 @@ try {
     $log->execute([$bookingId, "service={$serviceSlug} start={$startUtc->format('c')}"]);
 
     $pdo->commit();
+} catch (GoogleCalendarException $e) {
+    $pdo->rollBack();
+    GoogleCalendar::reportFailure('booking-create', $e);
+    fail(503, 'Buchen ist gerade kurz nicht möglich. Bitte versuch es in ein paar Minuten nochmal.');
 } catch (Throwable $e) {
     $pdo->rollBack();
     fail(500, 'Could not create booking');
+}
+
+// --- Google Calendar event (best-effort; booking already stands regardless) ---
+if (GoogleCalendar::isConnected()) {
+    try {
+        $eventId = GoogleCalendar::createBookingEvent([
+            'id' => $bookingId,
+            'customer_name' => $name,
+            'customer_email' => $email,
+            'customer_phone' => $phone,
+            'customer_note' => $note,
+        ], $service, $start, $end);
+        $pdo->prepare('UPDATE bookings SET google_event_id = ? WHERE id = ?')->execute([$eventId, $bookingId]);
+    } catch (Throwable $e) {
+        GoogleCalendar::reportFailure('create event', $e, $bookingId);
+    }
 }
 
 // --- Confirmation email (best-effort; booking already stands regardless) ---

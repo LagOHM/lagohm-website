@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../lib/db.php';
+require_once __DIR__ . '/../lib/GoogleCalendar.php';
 
 $token = (string)($_GET['token'] ?? $_POST['token'] ?? '');
 if (!preg_match('/^[0-9a-f]{64}$/', $token)) {
@@ -38,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $upd->execute([$booking['id']]);
         $log = $pdo->prepare('INSERT INTO booking_audit_log (booking_id, action, detail) VALUES (?, "cancelled", "via self-service link")');
         $log->execute([$booking['id']]);
+        GoogleCalendar::removeBookingEvent((int)$booking['id']);
         $booking['status'] = 'cancelled';
         $message = 'Dein Termin wurde storniert.';
     }

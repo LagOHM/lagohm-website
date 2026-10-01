@@ -36,3 +36,11 @@ table input[type="time"]{ padding:6px 8px; border:1px solid var(--line); border-
   width:100%; margin-top:6px; padding:10px 12px; border:1px solid var(--line);
   border-radius:10px; font-size:1rem; font-family: var(--sans);
 }
+
+.admin-section{ margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--line); }
+.admin-section:first-of-type{ border-top: none; padding-top: 0; }
+.admin-section h2{ font-size: 1.25rem; margin-bottom: 8px; }
+.admin-main form select{
+  width:100%; margin-top:6px; margin-bottom:16px; padding:10px 12px; border:1px solid var(--line);
+  border-radius:10px; font-size:1rem; font-family: var(--sans); background: var(--bg-card);
+}
