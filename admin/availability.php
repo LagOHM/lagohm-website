@@ -66,6 +66,7 @@ header('Content-Type: text/html; charset=utf-8');
     <nav class="admin-nav">
       <a href="index.php">Buchungen</a>
       <a href="availability.php" class="active">Verfügbarkeit</a>
+      <a href="settings.php">Einstellungen</a>
       <a href="logout.php">Logout</a>
     </nav>
   </div>

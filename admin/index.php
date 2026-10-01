@@ -52,6 +52,7 @@ header('Content-Type: text/html; charset=utf-8');
     <nav class="admin-nav">
       <a href="index.php" class="active">Buchungen</a>
       <a href="availability.php">Verfügbarkeit</a>
+      <a href="settings.php">Einstellungen</a>
       <a href="logout.php">Logout (<?= htmlspecialchars($_SESSION['admin_email'] ?? '', ENT_QUOTES, 'UTF-8') ?>)</a>
     </nav>
   </div>

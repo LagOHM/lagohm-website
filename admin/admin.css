@@ -29,3 +29,10 @@
 .admin-auth input{ width:100%; margin-top:6px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:1rem; }
 
 table input[type="time"]{ padding:6px 8px; border:1px solid var(--line); border-radius:8px; }
+
+.admin-main form label{ display:block; font-size:.9rem; color: var(--ink-soft); }
+.admin-main form input[type="text"],
+.admin-main form input[type="password"]{
+  width:100%; margin-top:6px; padding:10px 12px; border:1px solid var(--line);
+  border-radius:10px; font-size:1rem; font-family: var(--sans);
+}
