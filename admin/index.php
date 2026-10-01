@@ -68,7 +68,7 @@ header('Content-Type: text/html; charset=utf-8');
   <table class="admin-table">
     <thead>
       <tr>
-        <th>Termin</th><th>Leistung</th><th>Kundin/Kunde</th><th>Kontakt</th><th>Notiz</th><th>Status</th><th></th>
+        <th>Nr.</th><th>Termin</th><th>Leistung</th><th>Kundin/Kunde</th><th>Kontakt</th><th>Notiz</th><th>Status</th><th></th>
       </tr>
     </thead>
     <tbody>
@@ -78,6 +78,7 @@ header('Content-Type: text/html; charset=utf-8');
           $start->setTimezone($tz);
         ?>
         <tr class="<?= $b['status'] === 'cancelled' ? 'is-cancelled' : '' ?>">
+          <td>#<?= (int)$b['id'] ?></td>
           <td><?= $start->format('d.m.Y H:i') ?></td>
           <td><?= htmlspecialchars($b['service_name'], ENT_QUOTES, 'UTF-8') ?></td>
           <td><?= htmlspecialchars($b['customer_name'], ENT_QUOTES, 'UTF-8') ?></td>
@@ -86,7 +87,10 @@ header('Content-Type: text/html; charset=utf-8');
             <?php if ($b['customer_phone']): ?><br><?= htmlspecialchars($b['customer_phone'], ENT_QUOTES, 'UTF-8') ?><?php endif; ?>
           </td>
           <td><?= htmlspecialchars((string)$b['customer_note'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($b['status'], ENT_QUOTES, 'UTF-8') ?></td>
+          <td>
+            <?= htmlspecialchars($b['status'], ENT_QUOTES, 'UTF-8') ?>
+            <?php if ($b['reminder_sent_at'] && $b['status'] === 'confirmed'): ?><br><small>Erinnerung gesendet</small><?php endif; ?>
+          </td>
           <td>
             <?php if ($b['status'] === 'confirmed'): ?>
               <form method="post" onsubmit="return confirm('Diesen Termin wirklich stornieren?');">

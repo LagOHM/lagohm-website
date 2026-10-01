@@ -181,3 +181,14 @@ Die Datenschutzerklärung verspricht: IP-Adressen werden nach 30 Tagen gelöscht
 Zum Ausprobieren ohne zu löschen per SSH: `php ~/lagohm.de/httpdocs/cron/retention-cleanup.php --dry-run`
 
 Ist Google Kalender beim Löschen gerade nicht erreichbar, bleibt die Buchung bis zum nächsten Lauf stehen. Ist Google gar nicht mehr verbunden, wird die Buchung trotzdem gelöscht und die Ausgabe listet die Kalendertermine auf, die du dann von Hand löschen musst.
+
+# Setup-Checkliste: Erinnerungs-Mails (Phase 5)
+
+Jede Kundin bekommt automatisch eine Erinnerungs-Mail, sobald ihr Termin weniger als 24 Stunden entfernt ist (einstellbar über `reminder_hours_before`). Wer erst innerhalb dieser 24 Stunden bucht, bekommt keine extra Erinnerung – die Bestätigung kam ja gerade erst. Das erledigt `cron/send-reminders.php`, es muss **stündlich** laufen.
+
+1. Im WCP → „Websites & Domains“ (bei `lagohm.de`) → „Geplante Aufgaben“ → „Aufgabe hinzufügen“.
+2. Aufgabentyp **„PHP-Skript ausführen“**, Skriptpfad: `lagohm.de/httpdocs/cron/send-reminders.php` (über das Ordner-Symbol auswählen), Argumente leer, PHP 8.3.
+3. Ausführen: **Stündlich** (z. B. Minute 5).
+4. Benachrichtigen: **„Bei Fehlern“** – schlägt der Mailversand fehl, bekommst du eine Mail, und der nächste Lauf versucht es erneut.
+
+Testen: Eine Testbuchung auf deine eigene Adresse machen, im Admin-Bereich deren Nummer (#) ablesen und die Aufgabe einmal mit dem Argument `--booking=NUMMER` ausführen (danach das Argument wieder leeren). Die Erinnerung kommt dann sofort. Ohne zu senden nachsehen, wer gerade dran wäre: Argument `--dry-run`.
