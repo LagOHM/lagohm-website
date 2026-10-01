@@ -356,29 +356,84 @@ final class GoogleCalendar
             $headers[] = 'Authorization: Bearer ' . self::accessToken();
         }
 
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_CUSTOMREQUEST => $method,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_CONNECTTIMEOUT => 5,
-            CURLOPT_TIMEOUT => 10,
-        ]);
+        $payload = null;
         if ($form !== null) {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($form));
+            $payload = http_build_query($form);
             $headers[] = 'Content-Type: application/x-www-form-urlencoded';
         } elseif ($json !== null) {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($json, JSON_UNESCAPED_UNICODE));
+            $payload = json_encode($json, JSON_UNESCAPED_UNICODE);
             $headers[] = 'Content-Type: application/json';
         }
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-        $body = curl_exec($ch);
-        if ($body === false) {
-            $err = curl_error($ch);
-            throw new GoogleCalendarException('Network error talking to Google: ' . $err);
+        // cURL first; PHP's built-in HTTPS streams as fallback in case the host's libcurl
+        // is missing or broken (the Netcup image already has a broken libcurl for git).
+        $curlError = 'cURL extension not available';
+        if (function_exists('curl_init')) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_CUSTOMREQUEST => $method,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_TIMEOUT => 10,
+                CURLOPT_HTTPHEADER => $headers,
+            ]);
+            if ($payload !== null) {
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            }
+            $body = curl_exec($ch);
+            if ($body !== false) {
+                return self::decodeResponse((int)curl_getinfo($ch, CURLINFO_HTTP_CODE), (string)$body);
+            }
+            $curlError = curl_error($ch);
+            if (curl_errno($ch) === 28 /* CURLE_OPERATION_TIMEDOUT */) {
+                // Request may already have reached Google; retrying could create a duplicate event.
+                throw new GoogleCalendarException('Timeout talking to Google: ' . $curlError);
+            }
         }
-        $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
+        return self::httpViaStreams($method, $url, $headers, $payload, $curlError);
+    }
+
+    /**
+     * @return array{0:int, 1:array}
+     */
+    private static function httpViaStreams(string $method, string $url, array $headers, ?string $payload, string $curlError): array
+    {
+        if ($payload === null && $method !== 'GET') {
+            $headers[] = 'Content-Length: 0';
+        }
+        $context = stream_context_create([
+            'http' => [
+                'method' => $method,
+                'header' => implode("\r\n", $headers),
+                'content' => $payload ?? '',
+                'timeout' => 10,
+                'ignore_errors' => true, // return body on 4xx/5xx too
+            ],
+            'ssl' => ['verify_peer' => true, 'verify_peer_name' => true],
+        ]);
+
+        $body = @file_get_contents($url, false, $context);
+        if ($body === false) {
+            $err = error_get_last()['message'] ?? 'unknown error';
+            throw new GoogleCalendarException("Network error talking to Google (cURL: {$curlError}; streams: {$err})");
+        }
+
+        // $http_response_header is set by file_get_contents in this scope; take the last status line (after redirects).
+        $status = 0;
+        foreach ($http_response_header ?? [] as $line) {
+            if (preg_match('#^HTTP/\S+\s+(\d{3})#', $line, $m)) {
+                $status = (int)$m[1];
+            }
+        }
+        return self::decodeResponse($status, $body);
+    }
+
+    /**
+     * @return array{0:int, 1:array}
+     */
+    private static function decodeResponse(int $status, string $body): array
+    {
         $data = $body === '' ? [] : json_decode($body, true);
         return [$status, is_array($data) ? $data : []];
     }
