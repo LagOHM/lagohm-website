@@ -55,8 +55,8 @@ header('Content-Type: text/html; charset=utf-8');
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Einstellungen – Admin – LagOHM</title>
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="../css/style.css?v=20261002">
+<link rel="stylesheet" href="admin.css?v=20261002">
 </head>
 <body>
 <header class="admin-header">
