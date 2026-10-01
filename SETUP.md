@@ -167,3 +167,17 @@ Voraussetzung: `encryption_key_hex` in `lib/config.php` ist gesetzt (Phase 2, Sc
 - Jeder Termin in deinem Hauptkalender und im Buchungskalender blockt Buchungen (plus 30 Min. Puffer). Termine, die in Google auf „Verfügbar“ stehen, blocken nicht.
 - Kann die Website Google mal nicht erreichen (oder wurde der Zugriff widerrufen), zeigt sie zur Sicherheit **keine** freien Termine an und schickt dir höchstens alle 6 Stunden eine Mail.
 - Stornieren weiterhin nur im Admin-Bereich oder über den Link der Kundin — dann wird der Google-Termin automatisch mitgelöscht.
+
+# Setup-Checkliste: Automatische Datenlöschung
+
+Die Datenschutzerklärung verspricht: IP-Adressen werden nach 30 Tagen gelöscht, Buchungen 12 Monate nach dem Termin (in der Datenbank und im Google Kalender). Das erledigt `cron/retention-cleanup.php` – es muss nur einmal täglich laufen.
+
+1. Im WCP → „Websites & Domains“ → „Geplante Aufgaben“ → „Aufgabe hinzufügen“.
+2. Aufgabentyp **„PHP-Skript ausführen“**, Skriptpfad: `lagohm.de/httpdocs/cron/retention-cleanup.php`, PHP-Version wie die der Website.
+3. Ausführen: **Täglich**, z. B. 03:30 Uhr.
+4. „Benachrichtigen“: **„Bei Fehlern“** (oder „Jedes Mal“, wenn du die tägliche Zusammenfassung sehen willst).
+5. Optional einmal „Jetzt ausführen“ – die Ausgabe zeigt, wie viele Einträge gelöscht wurden.
+
+Zum Ausprobieren ohne zu löschen per SSH: `php ~/lagohm.de/httpdocs/cron/retention-cleanup.php --dry-run`
+
+Ist Google Kalender beim Löschen gerade nicht erreichbar, bleibt die Buchung bis zum nächsten Lauf stehen. Ist Google gar nicht mehr verbunden, wird die Buchung trotzdem gelöscht und die Ausgabe listet die Kalendertermine auf, die du dann von Hand löschen musst.

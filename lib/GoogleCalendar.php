@@ -188,18 +188,11 @@ final class GoogleCalendar
         $tzName = lagohm_config()['app']['timezone'] ?? 'Europe/Berlin';
         $adminUrl = rtrim(lagohm_config()['app']['base_url'], '/') . '/admin/';
 
+        // Phone and note stay in the database only (see datenschutz.html); look them up in the admin area.
         $lines = [
             'Kontakt: ' . $booking['customer_email'],
+            '',
         ];
-        if (!empty($booking['customer_phone'])) {
-            $lines[] = 'Telefon: ' . $booking['customer_phone'];
-        }
-        if (!empty($booking['customer_note'])) {
-            $lines[] = '';
-            $lines[] = 'Notiz:';
-            $lines[] = $booking['customer_note'];
-        }
-        $lines[] = '';
         $lines[] = 'Gebucht über lagohm.de (Buchung #' . (int)$booking['id'] . ').';
         $lines[] = 'Stornieren bitte nur im Admin-Bereich: ' . $adminUrl;
 
