@@ -148,6 +148,7 @@
         return data;
       })
       .then((data) => {
+        form.reset();
         form.hidden = true;
         successEl.hidden = false;
         successEl.innerHTML = `<h3>Dein Termin ist bestätigt!</h3>`
