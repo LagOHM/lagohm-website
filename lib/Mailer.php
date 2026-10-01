@@ -11,6 +11,10 @@ use PHPMailer\PHPMailer\Exception as PHPMailerException;
 final class Mailer
 {
     /**
+     * Sends a simple branded email: the LagOHM logo on top, then the given
+     * plain text as the body (line breaks preserved). A plain-text
+     * alternative is sent alongside for clients that prefer it.
+     *
      * @return true|string true on success, or an error message string on failure.
      */
     public static function send(string $toEmail, string $toName, string $subject, string $bodyText)
@@ -29,14 +33,56 @@ final class Mailer
 
             $mail->setFrom($cfg['from_email'], $cfg['from_name']);
             $mail->addAddress($toEmail, $toName);
-            $mail->isHTML(false);
+
+            $logoPath = __DIR__ . '/../images/logo.png';
+            $hasLogo = is_file($logoPath);
+            if ($hasLogo) {
+                $mail->addEmbeddedImage($logoPath, 'lagohm-logo', 'logo.png');
+            }
+
+            $mail->isHTML(true);
             $mail->Subject = $subject;
-            $mail->Body = $bodyText;
+            $mail->Body = self::renderHtml($bodyText, $hasLogo);
+            $mail->AltBody = $bodyText;
 
             $mail->send();
             return true;
         } catch (PHPMailerException $e) {
             return $mail->ErrorInfo ?: $e->getMessage();
         }
+    }
+
+    private static function renderHtml(string $bodyText, bool $hasLogo): string
+    {
+        $logoHtml = $hasLogo
+            ? '<img src="cid:lagohm-logo" alt="LagOHM" width="64" height="64" style="display:block;border-radius:16px;">'
+            : '';
+        $bodyHtml = nl2br(htmlspecialchars($bodyText, ENT_QUOTES, 'UTF-8'));
+
+        return <<<HTML
+<!DOCTYPE html>
+<html lang="de">
+<body style="margin:0;padding:0;background:#FBF4EF;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FBF4EF;padding:32px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background:#F6E9E0;border-radius:22px;padding:32px;font-family:Arial,Helvetica,sans-serif;color:#2B1B16;">
+          <tr>
+            <td align="center" style="padding-bottom:20px;">
+              {$logoHtml}
+            </td>
+          </tr>
+          <tr>
+            <td style="font-size:15px;line-height:1.6;">
+              {$bodyHtml}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+HTML;
     }
 }
