@@ -24,7 +24,7 @@ final class Mailer
             $mail->SMTPAuth = true;
             $mail->Username = $cfg['user'];
             $mail->Password = $cfg['pass'];
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // Netcup requires implicit SSL/TLS on port 465, not STARTTLS on 587
             $mail->CharSet = 'UTF-8';
 
             $mail->setFrom($cfg['from_email'], $cfg['from_name']);

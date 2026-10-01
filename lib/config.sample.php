@@ -18,7 +18,7 @@ return [
     // address (e.g. buchung@lagohm.de) later if you prefer to separate it.
     'smtp' => [
         'host' => 'mxf956.netcup.net',
-        'port' => 587,
+        'port' => 465,
         'user' => 'helena@lagohm.de',
         'pass' => 'CHANGE_ME',
         'from_email' => 'helena@lagohm.de',
