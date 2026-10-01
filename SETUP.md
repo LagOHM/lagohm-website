@@ -89,3 +89,44 @@ Erst wenn Schritt 5 zuverlässig funktioniert (gerne ein paar Tage beobachten), 
 ---
 
 Bei Problemen in einem der Schritte: mir kurz Bescheid geben, wo genau es hakt (z. B. "SSH-Login funktioniert nicht" oder "Zertifikat nicht in der Liste") — ich helfe dann gezielt weiter, ohne dass du mir Passwörter nennen musst.
+
+# Setup-Checkliste: Buchungs-Backend (Phase 2)
+
+Die Datenbank `k430430_lagohm` hast du bereits angelegt. Jetzt noch drei Dinge, alles per SSH (so wie in Phase 1 eingeloggt):
+
+## 1. Schema importieren
+
+```bash
+cd ~/lagohm.de/httpdocs
+mysql -h 10.35.249.85 -u k430430_lagohm -p k430430_lagohm < sql/schema.sql
+```
+
+Nach Enter fragt es nach dem Datenbank-Passwort (das, was du beim Anlegen der Datenbank gesetzt hast). Keine Ausgabe = erfolgreich.
+
+## 2. config.php anlegen
+
+```bash
+cp lib/config.sample.php lib/config.php
+nano lib/config.php
+```
+
+Dort folgende Werte eintragen (alles andere kann so bleiben):
+- `db.pass` — dein Datenbank-Passwort aus Schritt 1
+- `smtp.pass` — das Passwort deines `helena@lagohm.de`-Postfachs
+- `encryption_key_hex` — einen zufälligen Wert erzeugen mit:
+  ```bash
+  php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"
+  ```
+  und den Output hier einfügen (wird erst ab Phase 3 für den Google-Token gebraucht, aber gleich mit erledigen)
+
+Speichern in nano: `Strg+O`, Enter, dann `Strg+X` zum Verlassen.
+
+## 3. Admin-Konto erstellen
+
+Im Browser öffnen: `https://lagohm.de/admin/setup.php` — einmaliges Formular, danach nie wieder erreichbar (sobald ein Konto existiert, blockiert es sich selbst). Eigene E-Mail und ein Passwort (mind. 10 Zeichen) eintragen — das tippe ich nie, das ist nur für dich in deinem Browser.
+
+Danach einloggen unter `https://lagohm.de/admin/login.php` — dort siehst du die Buchungsliste und kannst die wöchentlichen Öffnungszeiten einstellen (Standard: Mo–Sa 9–19 Uhr, passend zu dem, was wir besprochen haben).
+
+## Testen
+
+Sobald das erledigt ist, teste ich die API direkt per curl (`/api/slots.php`, `/api/booking-create.php`) — dafür brauche ich keinen Zugriff auf deinen Server, das läuft über die normale Website-URL.

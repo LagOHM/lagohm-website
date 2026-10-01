@@ -4,10 +4,14 @@ Website für LagOHM (Helena), Yoga & Massage in München-Harlaching.
 
 ## Struktur
 
-- `index.html` – Startseite
-- `impressum.html`, `datenschutz.html` – rechtliche Seiten (Platzhalter, bitte vor Veröffentlichung mit echten Angaben ergänzen)
+- `index.html` – Startseite (Deutsch), `en/index.html` – englische Version
+- `impressum.html`, `datenschutz.html` – rechtliche Seiten
 - `css/style.css`, `js/script.js`
 - `images/` – Logo, Icons, Fotos
+- `sql/schema.sql` – Datenbank-Schema für das Buchungssystem
+- `lib/` – PHP-Backend-Klassen (DB, Auth, CSRF, Verfügbarkeits-Logik, Mailer); `lib/config.php` existiert nur auf dem Server, nie im Repo
+- `api/` – Öffentliche Endpunkte (`slots.php`, `booking-create.php`, `booking-cancel.php`)
+- `admin/` – Login-geschützter Bereich: Buchungsliste, Verfügbarkeiten verwalten
 
 ## Lokal ansehen
 

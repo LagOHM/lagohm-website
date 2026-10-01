@@ -1,0 +1,31 @@
+/* Admin area — functional styling reusing the site's design tokens from css/style.css */
+
+.admin-header{
+  background: var(--bg-card); border-bottom: 1px solid var(--line);
+  padding: 16px 0;
+}
+.admin-header-inner{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+.admin-nav{ display:flex; gap:20px; }
+.admin-nav a{ color: var(--ink-soft); font-size:.95rem; }
+.admin-nav a:hover, .admin-nav a.active{ color: var(--accent-1); }
+
+.admin-main{ padding: 40px 28px 80px; }
+.admin-main h1{ margin-bottom: 8px; }
+.admin-note{ font-size:.9rem; color: var(--ink-soft); max-width: 70ch; margin-bottom: 24px; }
+.admin-error{ color: var(--accent-1); font-weight:600; }
+.admin-success{ color: #2f7a3d; font-weight:600; }
+
+.admin-table{ width:100%; border-collapse: collapse; margin-top: 16px; font-size:.92rem; }
+.admin-table th, .admin-table td{ text-align:left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.admin-table tr.is-cancelled{ opacity:.5; text-decoration: line-through; }
+
+.admin-auth{
+  max-width: 400px; margin: 80px auto; padding: 36px 32px;
+  background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--line);
+}
+.admin-auth h1{ font-size: 1.5rem; }
+.admin-auth form{ display:flex; flex-direction:column; gap:16px; margin-top: 20px; }
+.admin-auth label{ font-size:.9rem; color: var(--ink-soft); }
+.admin-auth input{ width:100%; margin-top:6px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:1rem; }
+
+table input[type="time"]{ padding:6px 8px; border:1px solid var(--line); border-radius:8px; }
