@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/booking.css">
 </head>
 <body>
 
@@ -29,7 +30,7 @@
     </nav>
     <div class="header-cta">
       <div class="lang-switch"><span class="lang-current">DE</span><a href="en/">EN</a></div>
-      <a class="btn btn-primary btn-small" href="https://wa.me/4917696043066" target="_blank" rel="noopener">Termin buchen</a>
+      <a class="btn btn-primary btn-small" href="#buchen">Termin buchen</a>
       <button class="nav-toggle" id="nav-toggle" aria-label="Menü öffnen" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -45,7 +46,7 @@
         <h1>Ankommen. Loslassen.<br><em>Bei dir sein.</em></h1>
         <p class="lede">Yoga und Massage in München-Harlaching, in einem ruhigen, privaten Raum. <strong>Individuell auf dich abgestimmt</strong>, für mehr Entspannung, Regeneration und Balance.</p>
         <p class="hero-check">✓ Ausgebildet in Yin Yoga, Yoga-Therapie, Zen Shiatsu &amp; Thai Yoga-Massage</p>
-        <a class="btn btn-primary" href="https://wa.me/4917696043066" target="_blank" rel="noopener">Termin buchen</a>
+        <a class="btn btn-primary" href="#buchen">Termin buchen</a>
       </div>
       <div class="hero-media">
         <img src="images/helena-yoga.jpeg" alt="Helena in einer Yoga-Haltung am Seeufer">
@@ -126,7 +127,7 @@
         </div>
         <div class="service-panel-time">90 Minuten</div>
         <div class="service-panel-price">120&nbsp;€</div>
-        <a class="btn btn-primary" href="https://wa.me/4917696043066" target="_blank" rel="noopener">Termin buchen</a>
+        <a class="btn btn-primary" href="#buchen" data-booking-service="massage">Termin buchen</a>
         <p class="service-panel-note">Auf Anfrage auch als Hausbesuch möglich.</p>
       </aside>
     </div>
@@ -140,7 +141,7 @@
         </div>
         <div class="service-panel-time">75 Minuten</div>
         <div class="service-panel-price">60&nbsp;€</div>
-        <a class="btn btn-primary" href="https://wa.me/4917696043066" target="_blank" rel="noopener">Termin buchen</a>
+        <a class="btn btn-primary" href="#buchen" data-booking-service="yoga">Termin buchen</a>
         <p class="service-panel-note">Auf Anfrage auch als Hausbesuch möglich.</p>
       </aside>
 
@@ -166,10 +167,66 @@
   <section class="services-cta-section" id="buchen">
     <div class="wrap">
       <h2 class="center">Bereit für deinen Termin?</h2>
-      <div class="services-cta">
-        <a class="btn btn-primary" href="https://wa.me/4917696043066" target="_blank" rel="noopener">Termin buchen per WhatsApp</a>
-        <a class="btn btn-ghost" href="https://www.instagram.com/lagohm_yoga_massage/" target="_blank" rel="noopener">Oder per Instagram-DM</a>
+      <p class="lede center">Service wählen, freien Termin aussuchen, buchen — verbindlich und sofort bestätigt.</p>
+
+      <div class="booking-widget" id="booking-widget" data-csrf-url="api/csrf-token.php" data-slots-url="api/slots.php" data-create-url="api/booking-create.php">
+        <div class="booking-services" id="booking-services">
+          <button type="button" class="booking-service-card" data-service="yoga" data-service-name="Yoga" data-duration="75" data-price="60,00 €">
+            <strong>Yoga</strong>
+            <span>75 Minuten · 60&nbsp;€</span>
+          </button>
+          <button type="button" class="booking-service-card" data-service="massage" data-service-name="Massage" data-duration="90" data-price="120,00 €">
+            <strong>Massage</strong>
+            <span>90 Minuten · 120&nbsp;€</span>
+          </button>
+        </div>
+
+        <div class="booking-step" id="booking-step-date" hidden>
+          <label for="booking-date">Datum wählen</label>
+          <input type="date" id="booking-date">
+          <div class="booking-slots" id="booking-slots"></div>
+        </div>
+
+        <form class="booking-form" id="booking-form" hidden novalidate>
+          <input type="hidden" name="csrf_token" id="booking-csrf-token">
+          <input type="hidden" name="form_rendered_at" id="booking-rendered-at">
+          <input type="hidden" name="service" id="booking-input-service">
+          <input type="hidden" name="date" id="booking-input-date">
+          <input type="hidden" name="time" id="booking-input-time">
+
+          <div class="booking-summary" id="booking-summary"></div>
+
+          <label>Name*
+            <input type="text" name="name" required maxlength="150">
+          </label>
+          <label>E-Mail*
+            <input type="email" name="email" required maxlength="190">
+          </label>
+          <label>Telefon / WhatsApp (optional)
+            <input type="tel" name="phone" maxlength="40">
+          </label>
+          <label>Nachricht (optional) — z.&nbsp;B. Fragen oder eine Hausbesuch-Anfrage
+            <textarea name="note" rows="3" maxlength="2000"></textarea>
+          </label>
+
+          <div class="booking-honeypot" aria-hidden="true">
+            <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+          </div>
+
+          <label class="booking-consent">
+            <input type="checkbox" name="gdpr_consent" required>
+            Ich habe die <a href="datenschutz.html" target="_blank">Datenschutzerklärung</a> gelesen.
+          </label>
+
+          <p class="booking-error" id="booking-error" hidden></p>
+          <button type="submit" class="btn btn-primary">Verbindlich buchen</button>
+          <button type="button" class="btn btn-ghost btn-small" id="booking-back">← Andere Zeit wählen</button>
+        </form>
+
+        <div class="booking-success" id="booking-success" hidden></div>
       </div>
+
+      <p class="booking-alt center">Fragen oder Hausbesuch? Schreib mir direkt per <a href="https://wa.me/4917696043066" target="_blank" rel="noopener">WhatsApp</a> oder <a href="https://www.instagram.com/lagohm_yoga_massage/" target="_blank" rel="noopener">Instagram</a>.</p>
     </div>
   </section>
 
@@ -344,5 +401,6 @@
 </footer>
 
 <script src="js/script.js"></script>
+<script src="js/booking.js"></script>
 </body>
 </html>
