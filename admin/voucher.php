@@ -52,7 +52,7 @@ $t = $lang === 'en'
         'valid' => 'Valid until ' . $validUntil->format('j') . ' ' . $months[(int)$validUntil->format('n') - 1] . ' ' . $validUntil->format('Y'),
         'code' => 'Voucher no.',
         'redeem' => 'To redeem, book a session at lagohm.de/en and enter the voucher number in the message field.',
-        'place' => 'Munich-Harlaching',
+        'fallback' => 'A time-out – just for you.',
     ]
     : [
         'eyebrow' => 'Gutschein',
@@ -64,7 +64,7 @@ $t = $lang === 'en'
         'valid' => 'Gültig bis ' . $validUntil->format('d.m.Y'),
         'code' => 'Gutschein-Nr.',
         'redeem' => 'Einlösen: Termin auf lagohm.de buchen und die Gutschein-Nr. im Nachrichtenfeld angeben.',
-        'place' => 'München-Harlaching',
+        'fallback' => 'Eine Auszeit – ganz für dich.',
     ];
 [$title, $subtitle] = $t[$type];
 
@@ -99,8 +99,8 @@ header('Content-Type: text/html; charset=utf-8');
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 6mm; padding: 10mm; color:#fff; text-align:center;
   }
   .voucher-side img{ width: 58%; }
-  .voucher-side span{ font-size: 3.2mm; letter-spacing: .08em; opacity: .9; }
   .voucher-body{ padding: 12mm 13mm 10mm; display:flex; flex-direction:column; color: var(--ink); }
+  .voucher-main{ flex:1; display:flex; flex-direction:column; justify-content:center; }
   .voucher-eyebrow{ font-size: 3.2mm; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-1); font-weight: 700; }
   .voucher-title{ font-family: var(--serif); font-size: 12mm; line-height: 1.05; margin: 3mm 0 2mm; font-weight: 600; }
   .voucher-subtitle{ font-size: 3.6mm; color: var(--ink-soft); }
@@ -180,9 +180,9 @@ header('Content-Type: text/html; charset=utf-8');
   <div class="voucher">
     <div class="voucher-side">
       <img src="../images/logo-white.svg" alt="LagOHM">
-      <span><?= e($t['place']) ?></span>
     </div>
     <div class="voucher-body">
+      <div class="voucher-main">
       <div class="voucher-eyebrow"><?= e($t['eyebrow']) ?></div>
       <div class="voucher-title"><?= e($title) ?></div>
       <div class="voucher-subtitle"><?= e($subtitle) ?></div>
@@ -194,11 +194,13 @@ header('Content-Type: text/html; charset=utf-8');
       <?php endif; ?>
       <?php if ($message !== ''): ?>
         <div class="voucher-message"><?= $lang === 'en' ? '“' : '„' ?><?= e($message) ?><?= $lang === 'en' ? '”' : '“' ?></div>
+      <?php else: ?>
+        <div class="voucher-message"><?= e($t['fallback']) ?></div>
       <?php endif; ?>
+      </div>
       <div class="voucher-foot">
         <b><?= e($t['valid']) ?></b> · <?= e($t['code']) ?> <b><?= e($code) ?></b><br>
-        <?= e($t['redeem']) ?><br>
-        lagohm.de · <?= e(str_replace("\n", ', ', (string)(lagohm_config()['business']['address'] ?? ''))) ?>
+        <?= e($t['redeem']) ?>
       </div>
     </div>
   </div>
