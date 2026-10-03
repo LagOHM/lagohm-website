@@ -53,6 +53,7 @@ $t = $lang === 'en'
         'code' => 'Voucher no.',
         'redeem' => 'To redeem, book a session at lagohm.de/en and enter the voucher number in the message field.',
         'fallback' => 'A time-out – just for you.',
+        'nocash' => 'No cash refund – any remaining balance can be used for further sessions until the voucher expires.',
     ]
     : [
         'eyebrow' => 'Gutschein',
@@ -65,6 +66,7 @@ $t = $lang === 'en'
         'code' => 'Gutschein-Nr.',
         'redeem' => 'Einlösen: Termin auf lagohm.de buchen und die Gutschein-Nr. im Nachrichtenfeld angeben.',
         'fallback' => 'Eine Auszeit – ganz für dich.',
+        'nocash' => 'Keine Barauszahlung – ein Restbetrag kann bis zum Ablauf für weitere Termine genutzt werden.',
     ];
 [$title, $subtitle] = $t[$type];
 
@@ -202,6 +204,7 @@ header('Content-Type: text/html; charset=utf-8');
         <b><?= e($t['valid']) ?></b><br>
         <?= e($t['code']) ?> <b><?= e($code) ?></b><br>
         <?= e($t['redeem']) ?>
+        <?php if ($type === 'value'): ?><br><?= e($t['nocash']) ?><?php endif; ?>
       </div>
     </div>
   </div>
