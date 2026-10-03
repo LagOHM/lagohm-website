@@ -188,16 +188,17 @@ final class GoogleCalendar
         $tzName = lagohm_config()['app']['timezone'] ?? 'Europe/Berlin';
         $adminUrl = rtrim(lagohm_config()['app']['base_url'], '/') . '/admin/';
 
-        // Phone and note stay in the database only (see datenschutz.html); look them up in the admin area.
+        // No customer data goes to Google (see datenschutz.html): only service, time and booking number.
+        // Name, email, phone and note are looked up in the admin area.
+        $bookingNo = (int)$booking['id'];
         $lines = [
-            'Kontakt: ' . $booking['customer_email'],
-            '',
+            "Gebucht über lagohm.de (Buchung #{$bookingNo}).",
+            'Name und Kontakt im Admin-Bereich: ' . $adminUrl,
+            'Stornieren bitte nur dort, nicht hier im Kalender.',
         ];
-        $lines[] = 'Gebucht über lagohm.de (Buchung #' . (int)$booking['id'] . ').';
-        $lines[] = 'Stornieren bitte nur im Admin-Bereich: ' . $adminUrl;
 
         $data = self::api('POST', '/calendars/' . rawurlencode(self::bookingsCalendarId()) . '/events', [
-            'summary' => $service['name'] . ' – ' . $booking['customer_name'],
+            'summary' => $service['name'] . ' – Buchung #' . $bookingNo,
             'description' => implode("\n", $lines),
             'location' => str_replace("\n", ', ', (string)(lagohm_config()['business']['address'] ?? '')),
             'start' => ['dateTime' => $start->format(DateTime::RFC3339), 'timeZone' => $tzName],
