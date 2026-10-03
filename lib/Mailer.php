@@ -15,9 +15,11 @@ final class Mailer
      * plain text as the body (line breaks preserved). A plain-text
      * alternative is sent alongside for clients that prefer it.
      *
+     * Optional $attachments: list of [content, filename, mime type], e.g. a calendar file.
+     *
      * @return true|string true on success, or an error message string on failure.
      */
-    public static function send(string $toEmail, string $toName, string $subject, string $bodyText)
+    public static function send(string $toEmail, string $toName, string $subject, string $bodyText, array $attachments = [])
     {
         $cfg = lagohm_config()['smtp'];
         $mail = new PHPMailer(true);
@@ -44,6 +46,9 @@ final class Mailer
             $mail->Subject = $subject;
             $mail->Body = self::renderHtml($bodyText, $hasLogo);
             $mail->AltBody = $bodyText;
+            foreach ($attachments as [$content, $filename, $type]) {
+                $mail->addStringAttachment($content, $filename, PHPMailer::ENCODING_BASE64, $type);
+            }
 
             $mail->send();
             return true;

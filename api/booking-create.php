@@ -5,6 +5,7 @@ require_once __DIR__ . '/../lib/db.php';
 require_once __DIR__ . '/../lib/Csrf.php';
 require_once __DIR__ . '/../lib/Availability.php';
 require_once __DIR__ . '/../lib/Mailer.php';
+require_once __DIR__ . '/../lib/Ics.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -172,10 +173,20 @@ $body = "Hallo {$name},\n\n"
     . "Preis: {$priceEuro} €\n\n"
     . "Ort:\n{$address}\n\n"
     . "Zahlung: bar oder per Überweisung, vor Ort oder im Anschluss an den Termin.\n\n"
+    . "Im Anhang findest du den Termin zum Eintragen in deinen Kalender.\n\n"
     . "Falls du den Termin absagen musst, nutze bitte diesen Link:\n{$cancelUrl}\n\n"
     . "Bis bald,\nHelena · LagOHM";
 
-$mailResult = Mailer::send($email, $name, 'Deine Buchung bei LagOHM', $body);
+$attachments = [];
+try {
+    $ics = Ics::booking($bookingId, $service['name'] . ' bei LagOHM', $start, $end,
+        str_replace("\n", ', ', $address), "Absagen: {$cancelUrl}");
+    $attachments[] = [$ics, 'LagOHM-Termin.ics', 'text/calendar; charset=utf-8; method=PUBLISH'];
+} catch (Throwable $e) {
+    // The email still goes out without the calendar file.
+}
+
+$mailResult = Mailer::send($email, $name, 'Deine Buchung bei LagOHM', $body, $attachments);
 if ($mailResult !== true) {
     $log = $pdo->prepare('INSERT INTO booking_audit_log (booking_id, action, detail) VALUES (?, "email_failed", ?)');
     $log->execute([$bookingId, substr((string)$mailResult, 0, 490)]);
