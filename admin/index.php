@@ -109,10 +109,26 @@ header('Content-Type: text/html; charset=utf-8');
         </tr>
       <?php endforeach; ?>
       <?php if (!$bookings): ?>
-        <tr><td colspan="7">Noch keine Buchungen.</td></tr>
+        <tr><td colspan="8">Noch keine Buchungen.</td></tr>
       <?php endif; ?>
     </tbody>
   </table>
+  <p class="admin-note">Die Liste aktualisiert sich automatisch jede Minute, solange die Seite sichtbar ist. Zuletzt aktualisiert: <?= (new DateTime('now', $tz))->format('H:i') ?> Uhr</p>
 </main>
+<script>
+// Auto-refresh while visible; a hidden tab pauses (so the 2h idle logout still applies)
+// and refreshes as soon as it is shown again. GET via replace(): never re-submits a cancel form.
+(function () {
+  var INTERVAL = 60 * 1000;
+  var loadedAt = Date.now();
+  function refreshIfDue() {
+    if (document.visibilityState === 'visible' && Date.now() - loadedAt >= INTERVAL) {
+      window.location.replace('index.php');
+    }
+  }
+  setInterval(refreshIfDue, 5000);
+  document.addEventListener('visibilitychange', refreshIfDue);
+})();
+</script>
 </body>
 </html>
