@@ -192,6 +192,28 @@ if ($mailResult !== true) {
     $log->execute([$bookingId, substr((string)$mailResult, 0, 490)]);
 }
 
+// --- Notice to Helena (best effort). Goes to helena@lagohm.de, forwarded to her phone's Gmail app. ---
+$owner = (string)(lagohm_config()['smtp']['from_email'] ?? '');
+if ($owner !== '') {
+    $weekday = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][(int)$start->format('w')];
+    $notice = "Neue Buchung über lagohm.de:\n\n"
+        . "{$service['name']} ({$service['duration_minutes']} Minuten)\n"
+        . "{$weekday}, {$dateLabel}\n\n"
+        . "Name: {$name}\n"
+        . "E-Mail: {$email}\n"
+        . ($phone !== '' ? "Telefon: {$phone}\n" : '')
+        . ($note !== '' ? "\nNachricht:\n{$note}\n" : '')
+        . "\nAuf diese Mail antworten schreibt direkt an {$name}.\n"
+        . "Übersicht: " . rtrim(lagohm_config()['app']['base_url'], '/') . "/admin/";
+    $ownerResult = Mailer::send($owner, 'Helena',
+        "Neue Buchung: {$service['name']}, {$weekday} {$start->format('d.m.')} {$start->format('H:i')} – {$name}",
+        $notice, [], [$email, $name]);
+    if ($ownerResult !== true) {
+        $pdo->prepare('INSERT INTO booking_audit_log (booking_id, action, detail) VALUES (?, "email_failed", ?)')
+            ->execute([$bookingId, substr('owner notice: ' . (string)$ownerResult, 0, 490)]);
+    }
+}
+
 echo json_encode([
     'success' => true,
     'booking_id' => $bookingId,
