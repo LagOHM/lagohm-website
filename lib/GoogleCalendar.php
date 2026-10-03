@@ -213,8 +213,17 @@ final class GoogleCalendar
 
     public static function deleteEvent(string $eventId): void
     {
-        $path = '/calendars/' . rawurlencode(self::bookingsCalendarId()) . '/events/' . rawurlencode($eventId);
-        self::api('DELETE', $path, null, [404, 410]); // already gone = fine
+        // The event may sit in the main calendar if it was created before a separate bookings
+        // calendar was chosen, so try the bookings calendar first, then the others.
+        $calendars = array_values(array_unique(array_merge([self::bookingsCalendarId()], self::busyCalendarIds())));
+        foreach ($calendars as $calendarId) {
+            $path = '/calendars/' . rawurlencode($calendarId) . '/events/' . rawurlencode($eventId);
+            $data = self::api('DELETE', $path, null, [404, 410]);
+            if (empty($data['error'])) {
+                return; // deleted
+            }
+            // 404/410 here: not in this calendar (or already gone) — try the next one.
+        }
     }
 
     /**
