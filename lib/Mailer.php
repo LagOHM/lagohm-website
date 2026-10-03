@@ -16,10 +16,11 @@ final class Mailer
      * alternative is sent alongside for clients that prefer it.
      *
      * Optional $attachments: list of [content, filename, mime type], e.g. a calendar file.
+     * Optional $replyTo: [email, name], so "Antworten" goes to that address instead of the sender.
      *
      * @return true|string true on success, or an error message string on failure.
      */
-    public static function send(string $toEmail, string $toName, string $subject, string $bodyText, array $attachments = [])
+    public static function send(string $toEmail, string $toName, string $subject, string $bodyText, array $attachments = [], ?array $replyTo = null)
     {
         $cfg = lagohm_config()['smtp'];
         $mail = new PHPMailer(true);
@@ -35,6 +36,9 @@ final class Mailer
 
             $mail->setFrom($cfg['from_email'], $cfg['from_name']);
             $mail->addAddress($toEmail, $toName);
+            if ($replyTo) {
+                $mail->addReplyTo($replyTo[0], $replyTo[1] ?? '');
+            }
 
             $logoPath = __DIR__ . '/../images/logo.png';
             $hasLogo = is_file($logoPath);
