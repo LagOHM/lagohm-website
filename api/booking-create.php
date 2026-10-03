@@ -171,7 +171,7 @@ $body = "Hallo {$name},\n\n"
     . "Leistung: {$service['name']} ({$service['duration_minutes']} Minuten)\n"
     . "Termin: {$dateLabel}\n"
     . "Preis: {$priceEuro} €\n\n"
-    . "Ort:\n{$address}\n\n"
+    . "Ort:\n{$address}\n" . (lagohm_address_hint() !== '' ? lagohm_address_hint() . "\n" : '') . "\n"
     . "Zahlung: bar oder per Überweisung, vor Ort oder im Anschluss an den Termin.\n\n"
     . "Im Anhang findest du den Termin zum Eintragen in deinen Kalender.\n\n"
     . "Falls du den Termin absagen musst, nutze bitte diesen Link:\n{$cancelUrl}\n\n"
@@ -180,7 +180,7 @@ $body = "Hallo {$name},\n\n"
 $attachments = [];
 try {
     $ics = Ics::booking($bookingId, $service['name'] . ' bei LagOHM', $start, $end,
-        str_replace("\n", ', ', $address), "Absagen: {$cancelUrl}");
+        str_replace("\n", ', ', $address), trim(lagohm_address_hint() . "\n\nAbsagen: {$cancelUrl}"));
     $attachments[] = [$ics, 'LagOHM-Termin.ics', 'text/calendar; charset=utf-8; method=PUBLISH'];
 } catch (Throwable $e) {
     // The email still goes out without the calendar file.
