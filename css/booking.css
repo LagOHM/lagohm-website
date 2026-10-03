@@ -9,13 +9,21 @@
 
 .booking-services{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
 .booking-service-card{
-  display:flex; flex-direction:column; gap:4px;
+  display:flex; align-items:center; gap:14px;
   padding:18px 20px; border-radius:16px; border:1px solid var(--line);
   background: var(--bg); cursor:pointer; text-align:left;
   font-family: var(--sans); color: var(--ink);
 }
+/* Small version of the .service-panel-icon-badge used on the price panels */
+.booking-service-icon{
+  flex:none; width:44px; height:44px; border-radius:12px;
+  background: var(--grad);
+  display:flex; align-items:center; justify-content:center;
+}
+.booking-service-icon img{ width:24px; height:24px; display:block; }
+.booking-service-text{ display:flex; flex-direction:column; gap:4px; }
 .booking-service-card strong{ font-family: var(--serif); font-size:1.15rem; font-weight:600; }
-.booking-service-card span{ font-size:.88rem; color: var(--ink-soft); }
+.booking-service-text span{ font-size:.88rem; color: var(--ink-soft); }
 .booking-service-card:hover{ border-color: var(--accent-1); }
 .booking-service-card.is-selected{ border-color: var(--accent-1); box-shadow: 0 0 0 2px var(--accent-1) inset; }
 
