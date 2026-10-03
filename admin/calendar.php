@@ -89,6 +89,7 @@ header('Content-Type: text/html; charset=utf-8');
       <a href="index.php">Buchungen</a>
       <a href="availability.php">Verfügbarkeit</a>
       <a href="calendar.php" class="active">Kalender</a>
+      <a href="voucher.php">Gutscheine</a>
       <a href="settings.php">Einstellungen</a>
       <a href="logout.php">Logout</a>
     </nav>
