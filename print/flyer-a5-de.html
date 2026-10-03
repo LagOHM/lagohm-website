@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>LagOHM Flyer A5 – Deutsch</title>
+<!--
+  Print template: A5 flyer, two pages (front / back), 148 × 210 mm plus 3 mm bleed on every
+  side = 154 × 216 mm per page, as online print shops expect. Keep text inside the safe area
+  (padding below). Rendered to PDF with print/build-flyer.ps1.
+-->
+<style>
+  @font-face{ font-family:'Fraunces'; font-style:normal; font-weight:400 600; src:url(../fonts/fraunces-normal-latin.woff2) format('woff2'); }
+  @font-face{ font-family:'Fraunces'; font-style:italic; font-weight:500; src:url(../fonts/fraunces-italic-latin.woff2) format('woff2'); }
+  @font-face{ font-family:'Manrope'; font-style:normal; font-weight:400 700; src:url(../fonts/manrope-normal-latin.woff2) format('woff2'); }
+
+  :root{
+    --bg:#FBF4EF; --bg-card:#F6E9E0; --ink:#2B1B16; --ink-soft:#7C6459; --line:#E9D9CC;
+    --accent-1:#C6432B; --accent-2:#EFA05E;
+    --grad: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    --serif:"Fraunces", Georgia, serif; --sans:"Manrope", Arial, sans-serif;
+  }
+  @page{ size: 154mm 216mm; margin: 0; }
+  *{ box-sizing: border-box; }
+  html, body{ margin:0; padding:0; background:#ddd; }
+  body{ font-family: var(--sans); color: var(--ink); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page{
+    width:154mm; height:216mm; overflow:hidden; position:relative;
+    background: var(--bg); margin: 0 auto 10mm; page-break-after: always; break-after: page;
+  }
+  .page:last-child{ page-break-after: auto; break-after: auto; margin-bottom:0; }
+  @media screen{ .page{ box-shadow: 0 10px 40px rgba(0,0,0,.18); } body{ padding: 10mm 0; } }
+  @media print{ html, body{ background:none; } }
+
+  /* Front */
+  .front-photo{ position:absolute; inset:0 0 auto 0; height:132mm; background: url(../images/helena-yoga.jpeg) center 8% / cover no-repeat; }
+  .front-photo::after{ content:""; position:absolute; inset:auto 0 0 0; height:30mm; background: linear-gradient(to bottom, rgba(251,244,239,0), var(--bg)); }
+  .front-body{ position:absolute; inset:120mm 0 0 0; padding: 0 14mm 13mm; display:flex; flex-direction:column; }
+  .brand{ display:flex; align-items:center; gap:3mm; }
+  .brand-mark{ width:12mm; height:12mm; border-radius:3mm; background:var(--grad); display:flex; align-items:center; justify-content:center; }
+  .brand-mark img{ width:7mm; }
+  .brand-name{ font-family:var(--serif); font-weight:600; font-size:7mm; }
+  .brand-name span{ color: var(--accent-1); }
+  h1{ font-family:var(--serif); font-weight:600; font-size:10.5mm; line-height:1.08; margin: 6mm 0 4mm; }
+  h1 em{ font-style:italic; font-weight:500; color: var(--accent-1); }
+  .lede{ font-size:3.9mm; line-height:1.55; color: var(--ink-soft); margin:0; max-width: 115mm; }
+  .lede strong{ color: var(--ink); }
+  .front-foot{ margin-top:auto; display:flex; justify-content:space-between; align-items:flex-end; font-size:3.4mm; color: var(--ink-soft); }
+  .front-foot strong{ color: var(--ink); font-size:4mm; }
+
+  /* Back */
+  .back{ padding: 14mm 14mm 13mm; display:flex; flex-direction:column; }
+  .eyebrow{ font-size:3mm; letter-spacing:.16em; text-transform:uppercase; color: var(--accent-1); font-weight:700; }
+  h2{ font-family:var(--serif); font-weight:600; font-size:8mm; line-height:1.1; margin: 2mm 0 5mm; }
+  .offer{ display:flex; gap:4mm; align-items:flex-start; padding: 4.5mm 0; border-bottom: 0.3mm solid var(--line); }
+  .offer:first-of-type{ border-top: 0.3mm solid var(--line); }
+  .offer-icon{ flex:none; width:11mm; height:11mm; border-radius:3mm; background:var(--grad); display:flex; align-items:center; justify-content:center; }
+  .offer-icon img{ width:6mm; }
+  .offer-head{ display:flex; justify-content:space-between; align-items:baseline; gap:3mm; }
+  .offer-title{ font-family:var(--serif); font-weight:600; font-size:5.2mm; }
+  .offer-price{ font-family:var(--serif); font-weight:600; font-size:4.4mm; white-space:nowrap; }
+  .offer-meta{ font-size:3.2mm; color: var(--ink-soft); margin: .6mm 0 1.4mm; }
+  .offer p{ margin:0; font-size:3.4mm; line-height:1.5; }
+  .extras{ font-size:3.4mm; color: var(--ink-soft); margin: 4mm 0 0; line-height:1.6; }
+  .extras b{ color: var(--ink); }
+  .book{
+    margin-top:auto; display:flex; gap:5mm; align-items:center; padding: 5mm;
+    border-radius: 4mm; background: linear-gradient(135deg, #7A2A1D, var(--accent-1) 60%, var(--accent-2)); color:#fff;
+  }
+  .book img{ width:27mm; height:27mm; border-radius:2mm; background:#fff; padding:1.2mm; flex:none; }
+  .book-title{ font-family:var(--serif); font-weight:600; font-size:6mm; line-height:1.15; }
+  .book p{ margin: 1.5mm 0 0; font-size:3.3mm; line-height:1.5; opacity:.95; }
+  .book .url{ font-weight:700; font-size:4.2mm; margin-top:2mm; opacity:1; }
+  .back-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:5mm; font-size:3.3mm; color: var(--ink-soft); }
+  .insta{ display:flex; align-items:center; gap:1.6mm; color: var(--ink); font-weight:600; }
+  .insta svg{ width:4.6mm; height:4.6mm; }
+  .trained{ font-size:3mm; color: var(--ink-soft); margin-top:3mm; }
+</style>
+</head>
+<body>
+
+<section class="page front">
+  <div class="front-photo"></div>
+  <div class="front-body">
+    <div class="brand">
+      <span class="brand-mark"><img src="../images/icon-mark-white.svg" alt=""></span>
+      <span class="brand-name">LagOHM<span>.</span></span>
+    </div>
+    <h1>Ankommen. Loslassen.<br><em>Bei dir sein.</em></h1>
+    <p class="lede">Yoga und Massage in München-Harlaching, in einem ruhigen, privaten Raum. <strong>Individuell auf dich abgestimmt</strong>, für mehr Entspannung, Regeneration und Balance.</p>
+    <div class="front-foot">
+      <span>Yoga &amp; Massage · München-Harlaching</span>
+      <strong>lagohm.de</strong>
+    </div>
+  </div>
+</section>
+
+<section class="page back">
+  <span class="eyebrow">Mein Angebot.</span>
+  <h2>Zeit nur für dich.</h2>
+
+  <div class="offer">
+    <span class="offer-icon"><img src="../images/icon-massage-white.svg" alt=""></span>
+    <div>
+      <div class="offer-head"><span class="offer-title">Massage</span><span class="offer-price">120 €</span></div>
+      <div class="offer-meta">90 Minuten · Thai Yoga-Massage &amp; Shiatsu</div>
+      <p>Achtsame Körperarbeit, bekleidet auf einer weichen Matte: sanfte Dehnungen, fließende Bewegungen und Druck – für tiefe Entspannung von Körper und Nervensystem.</p>
+    </div>
+  </div>
+  <div class="offer">
+    <span class="offer-icon"><img src="../images/icon-yoga-white.svg" alt=""></span>
+    <div>
+      <div class="offer-head"><span class="offer-title">Private Yoga Session</span><span class="offer-price">60 €</span></div>
+      <div class="offer-meta">75 Minuten · Yin Yoga &amp; Yoga-Therapie</div>
+      <p>Einzelunterricht, abgestimmt auf deinen Körper und das, was du gerade brauchst – ohne Leistungsdruck, mit Raum, wirklich bei dir anzukommen.</p>
+    </div>
+  </div>
+
+  <p class="extras"><b>Auf Anfrage auch als Hausbesuch.</b> · <b>Gutscheine</b> zum Verschenken erhältlich.</p>
+
+  <div class="book">
+    <img src="qr-buchen.svg" alt="QR-Code zur Online-Buchung">
+    <div>
+      <div class="book-title">Termin online buchen</div>
+      <p>QR-Code scannen oder Website öffnen, freien Termin wählen – sofort bestätigt.</p>
+      <p class="url">lagohm.de</p>
+    </div>
+  </div>
+
+  <div class="back-foot">
+    <span class="insta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1"/></svg>@lagohm_yoga_massage</span>
+    <span>Nicht zu viel, nicht zu wenig. Einfach LagOHM.</span>
+  </div>
+  <div class="trained">✓ Ausgebildet in Yin Yoga, Yoga-Therapie, Zen Shiatsu &amp; Thai Yoga-Massage</div>
+</section>
+
+</body>
+</html>
