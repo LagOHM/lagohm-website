@@ -127,6 +127,19 @@ header('Content-Type: text/html; charset=utf-8');
 
   <?php if ($connected && !$healthError): ?>
     <section class="admin-section">
+      <?php
+        $primaryName = 'Hauptkalender';
+        $bookingsName = null;
+        foreach ($calendars as $cal) {
+            if (!empty($cal['primary'])) {
+                $primaryName = 'Hauptkalender (' . $cal['summary'] . ')';
+            }
+            if (($row['calendar_id_bookings'] ?? '') !== '' && $cal['id'] === $row['calendar_id_bookings']) {
+                $bookingsName = $cal['summary'];
+            }
+        }
+      ?>
+      <p><strong>Diese Kalender blockieren Buchungszeiten:</strong> <?= e($primaryName) ?><?= $bookingsName ? ' und „' . e($bookingsName) . '“' : '' ?>. Termine auf „Verfügbar“ (z.&nbsp;B. ganztägige) blockieren nicht.</p>
       <h2>Buchungskalender</h2>
       <p class="admin-note">In welchen Kalender sollen neue Buchungen eingetragen werden? Empfohlen: ein eigener Kalender „LagOHM Termine“ (in Google Kalender links bei „Weitere Kalender“ → „+“ → „Neuen Kalender erstellen“), dann hier auswählen. Dein Hauptkalender und dieser Kalender blocken beide Buchungszeiten.</p>
       <form method="post" style="max-width:480px;">
