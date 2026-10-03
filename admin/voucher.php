@@ -11,7 +11,7 @@ require_once __DIR__ . '/../lib/Csrf.php';
 
 /**
  * Gift voucher generator: fill in the form, check the preview, then "Speichern & PDF erstellen"
- * stores the voucher in the register (vouchers.php) and opens the print dialog (A5 landscape).
+ * stores the voucher in the register (vouchers.php) and opens the print dialog (A4 landscape).
  * Names and the greeting are only rendered into the PDF, never stored. The form is POSTed so
  * they don't end up in URLs or server logs either.
  */
@@ -129,37 +129,43 @@ header('Content-Type: text/html; charset=utf-8');
   }
   .voucher-actions{ display:flex; gap:12px; flex-wrap:wrap; margin: 24px 0 32px; }
 
-  /* The voucher itself: A5 landscape (210 × 148 mm) */
+  /* The voucher: an A4 landscape page (297 × 210 mm) with a white margin around the card,
+     so home printers (which can't print to the edge) need no scaling and no cutting. */
+  .voucher-scroll{ overflow-x:auto; padding-bottom: 8px; }
+  .voucher-page{
+    width: 297mm; height: 210mm; padding: 10mm; box-sizing: border-box;
+    background: #fff; box-shadow: 0 18px 50px rgba(43,27,22,.16);
+  }
   .voucher{
-    width: 210mm; height: 148mm; max-width: 100%; aspect-ratio: 210 / 148;
+    width: 100%; height: 100%;
     display:grid; grid-template-columns: 38% 62%;
-    background: var(--bg); border-radius: 18px; overflow:hidden;
-    box-shadow: 0 18px 50px rgba(43,27,22,.16);
+    background: var(--bg); border-radius: 6mm; overflow:hidden;
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   .voucher-side{
     background: linear-gradient(160deg, #7A2A1D, var(--accent-1) 55%, var(--accent-2));
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 6mm; padding: 10mm; color:#fff; text-align:center;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 13mm; color:#fff; text-align:center;
   }
   .voucher-side img{ width: 58%; }
-  .voucher-body{ padding: 12mm 13mm 10mm; display:flex; flex-direction:column; color: var(--ink); }
+  .voucher-body{ padding: 16mm 17mm 13mm; display:flex; flex-direction:column; color: var(--ink); }
   .voucher-main{ flex:1; display:flex; flex-direction:column; justify-content:center; }
-  .voucher-eyebrow{ font-size: 3.2mm; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-1); font-weight: 700; }
-  .voucher-title{ font-family: var(--serif); font-size: 12mm; line-height: 1.05; margin: 3mm 0 2mm; font-weight: 600; }
-  .voucher-subtitle{ font-size: 3.6mm; color: var(--ink-soft); }
-  .voucher-names{ margin-top: 7mm; font-size: 4mm; line-height: 1.6; }
-  .voucher-names strong{ font-family: var(--serif); font-weight: 600; font-size: 4.6mm; }
-  .voucher-message{ margin-top: 4mm; font-family: var(--serif); font-style: italic; font-size: 4.2mm; line-height: 1.45; color: var(--ink); white-space: pre-line; }
-  .voucher-foot{ margin-top: auto; padding-top: 5mm; border-top: 1px solid var(--line); font-size: 3mm; color: var(--ink-soft); line-height: 1.55; }
+  .voucher-eyebrow{ font-size: 4.2mm; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-1); font-weight: 700; }
+  .voucher-title{ font-family: var(--serif); font-size: 16mm; line-height: 1.05; margin: 4mm 0 2.6mm; font-weight: 600; }
+  .voucher-subtitle{ font-size: 4.7mm; color: var(--ink-soft); }
+  .voucher-names{ margin-top: 9mm; font-size: 5.2mm; line-height: 1.6; }
+  .voucher-names strong{ font-family: var(--serif); font-weight: 600; font-size: 6mm; }
+  .voucher-message{ margin-top: 5mm; font-family: var(--serif); font-style: italic; font-size: 5.5mm; line-height: 1.45; color: var(--ink); white-space: pre-line; }
+  .voucher-foot{ margin-top: auto; padding-top: 6.5mm; border-top: 1px solid var(--line); font-size: 3.9mm; color: var(--ink-soft); line-height: 1.55; }
   .voucher-foot b{ color: var(--ink); }
 
-  @page{ size: A5 landscape; margin: 0; }
+  @page{ size: A4 landscape; margin: 0; }
   @media print{
-    body{ background: none; }
-    .admin-header, .admin-main > :not(.voucher){ display:none !important; }
+    body{ background: #fff; }
+    .admin-header, .admin-main > :not(.voucher-scroll){ display:none !important; }
     html, body{ margin:0; padding:0; }
     .admin-main.wrap{ padding:0; margin:0; width:auto; max-width:none; }
-    .voucher{ border-radius:0; box-shadow:none; width:210mm; height:148mm; }
+    .voucher-scroll{ overflow:visible; padding:0; }
+    .voucher-page{ box-shadow:none; }
   }
 </style>
 </head>
@@ -180,7 +186,7 @@ header('Content-Type: text/html; charset=utf-8');
 <main class="wrap admin-main">
   <p><a class="back" href="vouchers.php">← Zur Gutschein-Liste</a></p>
   <h1>Gutschein erstellen</h1>
-  <p class="admin-note">Angaben ausfüllen, „Vorschau aktualisieren“, dann „Speichern &amp; PDF erstellen“: Der Gutschein kommt in die Liste, und das Druckfenster öffnet sich – dort als Ziel „Als PDF speichern“ wählen (A5 quer, Ränder: keine, Hintergrundgrafiken an). In der Liste werden nur Nummer, Art, Betrag und Daten gespeichert; Namen und Grußtext stehen nur im PDF.</p>
+  <p class="admin-note">Angaben ausfüllen, „Vorschau aktualisieren“, dann „Speichern &amp; PDF erstellen“: Der Gutschein kommt in die Liste, und das Druckfenster öffnet sich – dort als Ziel „Als PDF speichern“ wählen (A4 quer, Ränder: keine, Hintergrundgrafiken an). In der Liste werden nur Nummer, Art, Betrag und Daten gespeichert; Namen und Grußtext stehen nur im PDF.</p>
   <?php if ($error): ?><p class="admin-error"><?= e($error) ?></p><?php endif; ?>
   <?php if ($notice): ?><p class="admin-success"><?= e($notice) ?></p><?php endif; ?>
 
@@ -224,6 +230,7 @@ header('Content-Type: text/html; charset=utf-8');
     </div>
   </form>
 
+  <div class="voucher-scroll"><div class="voucher-page">
   <div class="voucher">
     <div class="voucher-side">
       <img src="../images/logo-white.svg" alt="LagOHM">
@@ -253,6 +260,7 @@ header('Content-Type: text/html; charset=utf-8');
       </div>
     </div>
   </div>
+  </div></div>
 </main>
 <?php if ($autoPrint): ?>
 <script>window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 300); });</script>
