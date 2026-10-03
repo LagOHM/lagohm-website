@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../lib/db.php';
 require_once __DIR__ . '/../lib/Csrf.php';
+require_once __DIR__ . '/../lib/Auth.php';
 require_once __DIR__ . '/../lib/Availability.php';
 require_once __DIR__ . '/../lib/Mailer.php';
 require_once __DIR__ . '/../lib/Ics.php';
@@ -107,16 +108,18 @@ if (!$service) {
     fail(404, 'Bitte wähle eine Leistung aus.');
 }
 
-// --- Rate limiting ---
-$rl = $pdo->prepare('SELECT COUNT(*) AS c FROM bookings WHERE ip_address = ? AND created_at > (NOW() - INTERVAL 1 HOUR)');
-$rl->execute([$ip]);
-if ((int)$rl->fetch()['c'] >= 3) {
-    fail(429, 'Von hier wurden gerade schon mehrere Buchungen abgeschickt. Bitte versuch es später nochmal oder schreib mir direkt.');
-}
-$rl2 = $pdo->prepare('SELECT COUNT(*) AS c FROM bookings WHERE customer_email = ? AND created_at > (NOW() - INTERVAL 1 DAY)');
-$rl2->execute([$email]);
-if ((int)$rl2->fetch()['c'] >= 5) {
-    fail(429, 'Von hier wurden gerade schon mehrere Buchungen abgeschickt. Bitte versuch es später nochmal oder schreib mir direkt.');
+// --- Rate limiting (skipped while Helena is logged into the admin area, so she can test freely) ---
+if (!Auth::check()) {
+    $rl = $pdo->prepare('SELECT COUNT(*) AS c FROM bookings WHERE ip_address = ? AND created_at > (NOW() - INTERVAL 1 HOUR)');
+    $rl->execute([$ip]);
+    if ((int)$rl->fetch()['c'] >= 3) {
+        fail(429, 'Von hier wurden gerade schon mehrere Buchungen abgeschickt. Bitte versuch es später nochmal oder schreib mir direkt.');
+    }
+    $rl2 = $pdo->prepare('SELECT COUNT(*) AS c FROM bookings WHERE customer_email = ? AND created_at > (NOW() - INTERVAL 1 DAY)');
+    $rl2->execute([$email]);
+    if ((int)$rl2->fetch()['c'] >= 5) {
+        fail(429, 'Von hier wurden gerade schon mehrere Buchungen abgeschickt. Bitte versuch es später nochmal oder schreib mir direkt.');
+    }
 }
 
 $tz = new DateTimeZone(lagohm_config()['app']['timezone'] ?? 'Europe/Berlin');
