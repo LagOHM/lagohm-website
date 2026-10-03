@@ -43,3 +43,12 @@ function lagohm_setting(string $key, ?string $default = null): ?string
     }
     return $cache[$key] ?? $default;
 }
+
+/**
+ * Extra line printed under the address in customer emails and the calendar file
+ * (e.g. which doorbell to ring). Editable under Admin → Einstellungen; empty = no hint.
+ */
+function lagohm_address_hint(): string
+{
+    return trim((string)lagohm_setting('address_hint', 'Bitte bei „Gillerblad“ klingeln.'));
+}

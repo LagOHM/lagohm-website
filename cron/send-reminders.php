@@ -84,7 +84,7 @@ foreach ($bookings as $b) {
         . "kleine Erinnerung: {$dayWord} um {$start->format('H:i')} Uhr ist dein Termin bei LagOHM.\n\n"
         . "Leistung: {$b['service_name']} ({$b['duration_minutes']} Minuten)\n"
         . "Termin: {$start->format('d.m.Y')} um {$start->format('H:i')} Uhr\n\n"
-        . "Ort:\n{$address}\n\n"
+        . "Ort:\n{$address}\n" . (lagohm_address_hint() !== '' ? lagohm_address_hint() . "\n" : '') . "\n"
         . "Falls du doch nicht kommen kannst, sag den Termin bitte über diesen Link ab:\n{$cancelUrl}\n\n"
         . "Ich freu mich auf dich,\nHelena · LagOHM";
 
