@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../lib/db.php';
 require_once __DIR__ . '/../lib/GoogleCalendar.php';
+require_once __DIR__ . '/../lib/CancellationMail.php';
 
 $token = (string)($_GET['token'] ?? $_POST['token'] ?? '');
 if (!preg_match('/^[0-9a-f]{64}$/', $token)) {
@@ -35,13 +36,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($booking['status'] === 'cancelled') {
         $message = 'Dieser Termin wurde bereits storniert.';
     } else {
-        $upd = $pdo->prepare('UPDATE bookings SET status = "cancelled" WHERE id = ?');
+        // "AND status" so a double tap on the button never sends the emails twice.
+        $upd = $pdo->prepare('UPDATE bookings SET status = "cancelled" WHERE id = ? AND status = "confirmed"');
         $upd->execute([$booking['id']]);
-        $log = $pdo->prepare('INSERT INTO booking_audit_log (booking_id, action, detail) VALUES (?, "cancelled", "via self-service link")');
-        $log->execute([$booking['id']]);
-        GoogleCalendar::removeBookingEvent((int)$booking['id']);
+        if ($upd->rowCount() > 0) {
+            $log = $pdo->prepare('INSERT INTO booking_audit_log (booking_id, action, detail) VALUES (?, "cancelled", "via self-service link")');
+            $log->execute([$booking['id']]);
+            GoogleCalendar::removeBookingEvent((int)$booking['id']);
+            $emailed = CancellationMail::send((int)$booking['id'], CancellationMail::BY_CUSTOMER);
+        }
         $booking['status'] = 'cancelled';
-        $message = 'Dein Termin wurde storniert.';
+        $message = 'Dein Termin wurde storniert.'
+            . (!empty($emailed) ? ' Eine Bestätigung ist unterwegs an deine E-Mail-Adresse.' : '');
     }
 }
 

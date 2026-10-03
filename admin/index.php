@@ -5,6 +5,7 @@ require_once __DIR__ . '/../lib/db.php';
 require_once __DIR__ . '/../lib/Auth.php';
 require_once __DIR__ . '/../lib/Csrf.php';
 require_once __DIR__ . '/../lib/GoogleCalendar.php';
+require_once __DIR__ . '/../lib/CancellationMail.php';
 
 lagohm_config();
 Auth::requireLogin();
@@ -25,7 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_booking_id']))
             $log = $pdo->prepare('INSERT INTO booking_audit_log (booking_id, action, detail) VALUES (?, "cancelled", "via admin dashboard")');
             $log->execute([$id]);
             GoogleCalendar::removeBookingEvent($id);
-            $message = 'Termin storniert.';
+            $message = CancellationMail::send($id, CancellationMail::BY_ADMIN)
+                ? 'Termin storniert. Die Kundin/der Kunde wurde per E-Mail informiert.'
+                : 'Termin storniert. (Keine E-Mail verschickt: Termin liegt in der Vergangenheit oder der Versand ist fehlgeschlagen.)';
         }
     }
 }
