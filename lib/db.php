@@ -27,8 +27,30 @@ function lagohm_db(): PDO
             PDO::ATTR_EMULATE_PREPARES => false,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]);
+        lagohm_migrate($pdo);
     }
     return $pdo;
+}
+
+/**
+ * Small schema upgrades applied automatically (there is no working mysql CLI on the host).
+ * Each step checks first, so this is a cheap no-op once applied.
+ */
+function lagohm_migrate(PDO $pdo): void
+{
+    try {
+        if (!$pdo->query("SHOW COLUMNS FROM bookings LIKE 'language'")->fetch()) {
+            $pdo->exec("ALTER TABLE bookings ADD COLUMN language CHAR(2) NOT NULL DEFAULT 'de' AFTER customer_note");
+        }
+    } catch (Throwable $e) {
+        // Tables not created yet (fresh install) — sql/schema.sql has the column.
+    }
+}
+
+/** Normalizes a language code to the two the site supports. */
+function lagohm_lang(?string $lang): string
+{
+    return $lang === 'en' ? 'en' : 'de';
 }
 
 function lagohm_setting(string $key, ?string $default = null): ?string
@@ -48,7 +70,9 @@ function lagohm_setting(string $key, ?string $default = null): ?string
  * Extra line printed under the address in customer emails and the calendar file
  * (e.g. which doorbell to ring). Editable under Admin → Einstellungen; empty = no hint.
  */
-function lagohm_address_hint(): string
+function lagohm_address_hint(string $lang = 'de'): string
 {
-    return trim((string)lagohm_setting('address_hint', 'Bitte bei „Gillerblad“ klingeln.'));
+    return $lang === 'en'
+        ? trim((string)lagohm_setting('address_hint_en', 'Please ring the bell marked “Gillerblad”.'))
+        : trim((string)lagohm_setting('address_hint', 'Bitte bei „Gillerblad“ klingeln.'));
 }

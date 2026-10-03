@@ -20,9 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $messageType = 'error';
     } elseif (isset($_POST['address_hint_form'])) {
         $addressHint = trim((string)($_POST['address_hint'] ?? ''));
-        lagohm_db()->prepare('INSERT INTO app_settings (setting_key, setting_value) VALUES ("address_hint", ?)
-            ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)')->execute([mb_substr($addressHint, 0, 255)]);
-        $message = $addressHint === '' ? 'Hinweis entfernt.' : 'Hinweis gespeichert.';
+        $addressHintEn = trim((string)($_POST['address_hint_en'] ?? ''));
+        $save = lagohm_db()->prepare('INSERT INTO app_settings (setting_key, setting_value) VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)');
+        $save->execute(['address_hint', mb_substr($addressHint, 0, 255)]);
+        $save->execute(['address_hint_en', mb_substr($addressHintEn, 0, 255)]);
+        $message = ($addressHint === '' && $addressHintEn === '') ? 'Hinweis entfernt.' : 'Hinweis gespeichert.';
     } else {
         $config['smtp']['user'] = trim((string)($_POST['smtp_user'] ?? $config['smtp']['user']));
         $config['smtp']['from_email'] = trim((string)($_POST['smtp_from_email'] ?? $config['smtp']['from_email']));
@@ -60,8 +63,8 @@ header('Content-Type: text/html; charset=utf-8');
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Einstellungen – Admin – LagOHM</title>
-<link rel="stylesheet" href="../css/style.css?v=20261002">
-<link rel="stylesheet" href="admin.css?v=20261002">
+<link rel="stylesheet" href="../css/style.css?v=20261003">
+<link rel="stylesheet" href="admin.css?v=20261003">
 </head>
 <body>
 <header class="admin-header">
@@ -117,6 +120,10 @@ header('Content-Type: text/html; charset=utf-8');
     <input type="hidden" name="address_hint_form" value="1">
     <label>Hinweis (z. B. Klingel)<br>
       <input type="text" name="address_hint" maxlength="255" value="<?= htmlspecialchars($addressHint ?? lagohm_address_hint(), ENT_QUOTES, 'UTF-8') ?>">
+    </label>
+    <br><br>
+    <label>Englisch (für Buchungen über die englische Seite)<br>
+      <input type="text" name="address_hint_en" maxlength="255" value="<?= htmlspecialchars($addressHintEn ?? lagohm_address_hint('en'), ENT_QUOTES, 'UTF-8') ?>">
     </label>
     <br><br>
     <button type="submit" class="btn btn-primary">Hinweis speichern</button>

@@ -11,6 +11,25 @@ header('Content-Type: application/json; charset=utf-8');
 
 function fail(int $code, string $message): void
 {
+    // Messages are written in German; bookings from the English site get them translated.
+    static $en = [
+        'Die Seite war zu lange offen. Bitte lade sie neu und versuch es nochmal.' => 'This page was open for too long. Please reload it and try again.',
+        'Die Buchung konnte nicht abgeschickt werden. Bitte lade die Seite neu und versuch es nochmal.' => 'The booking could not be sent. Please reload the page and try again.',
+        'Bitte wähle Datum und Uhrzeit aus.' => 'Please choose a date and time.',
+        'Bitte gib deinen Namen an.' => 'Please enter your name.',
+        'Bitte gib eine gültige E-Mail-Adresse an.' => 'Please enter a valid email address.',
+        'Die Telefonnummer ist zu lang.' => 'The phone number is too long.',
+        'Die Nachricht ist zu lang (höchstens 2000 Zeichen).' => 'The message is too long (2000 characters at most).',
+        'Bitte bestätige, dass du die Datenschutzerklärung gelesen hast.' => 'Please confirm that you have read the privacy policy.',
+        'Bitte wähle eine Leistung aus.' => 'Please choose a service.',
+        'Von hier wurden gerade schon mehrere Buchungen abgeschickt. Bitte versuch es später nochmal oder schreib mir direkt.' => 'Several bookings were just sent from here. Please try again later or message me directly.',
+        'Dieser Termin ist leider gerade nicht mehr frei. Bitte wähle eine andere Zeit.' => 'Sorry, this time has just been taken. Please choose another one.',
+        'Buchen ist gerade kurz nicht möglich. Bitte versuch es in ein paar Minuten nochmal.' => 'Booking is briefly unavailable. Please try again in a few minutes.',
+        'Die Buchung konnte nicht gespeichert werden. Bitte versuch es nochmal.' => 'The booking could not be saved. Please try again.',
+    ];
+    if (($GLOBALS['bookingLang'] ?? 'de') === 'en') {
+        $message = $en[$message] ?? $message;
+    }
     http_response_code($code);
     echo json_encode(['error' => $message]);
     exit;
@@ -25,6 +44,8 @@ $input = json_decode($raw, true);
 if (!is_array($input)) {
     $input = $_POST;
 }
+$lang = lagohm_lang(isset($input['lang']) ? (string)$input['lang'] : null);
+$GLOBALS['bookingLang'] = $lang;
 
 // --- Spam defenses ---
 if (!Csrf::verify($input['csrf_token'] ?? null)) {
@@ -67,7 +88,9 @@ if (function_exists('idn_to_ascii')) {
     $emailDomain = idn_to_ascii($emailDomain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46) ?: $emailDomain;
 }
 if (!checkdnsrr($emailDomain . '.', 'MX') && !checkdnsrr($emailDomain . '.', 'A') && !checkdnsrr($emailDomain . '.', 'AAAA')) {
-    fail(400, 'Die E-Mail-Adresse scheint nicht zu existieren (' . $emailDomain . '). Bitte prüf sie auf Tippfehler.');
+    fail(400, $lang === 'en'
+        ? 'This email address does not seem to exist (' . $emailDomain . '). Please check it for typos.'
+        : 'Die E-Mail-Adresse scheint nicht zu existieren (' . $emailDomain . '). Bitte prüf sie auf Tippfehler.');
 }
 if (mb_strlen($phone) > 40) {
     fail(400, 'Die Telefonnummer ist zu lang.');
@@ -115,14 +138,15 @@ try {
 
     $cancellationToken = bin2hex(random_bytes(32));
     $ins = $pdo->prepare('INSERT INTO bookings
-        (service_id, customer_name, customer_email, customer_phone, customer_note, start_datetime, end_datetime, status, cancellation_token, ip_address)
-        VALUES (?, ?, ?, ?, ?, ?, ?, "confirmed", ?, ?)');
+        (service_id, customer_name, customer_email, customer_phone, customer_note, language, start_datetime, end_datetime, status, cancellation_token, ip_address)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, "confirmed", ?, ?)');
     $ins->execute([
         $service['id'],
         $name,
         $email,
         $phone !== '' ? $phone : null,
         $note !== '' ? $note : null,
+        $lang,
         $startUtc->format('Y-m-d H:i:s'),
         $endUtc->format('Y-m-d H:i:s'),
         $cancellationToken,
@@ -161,32 +185,56 @@ if (GoogleCalendar::isConnected()) {
 
 // --- Confirmation email (best-effort; booking already stands regardless) ---
 $address = lagohm_config()['business']['address'] ?? '';
+$hint = lagohm_address_hint($lang);
 $priceEuro = number_format(((int)$service['price_cents']) / 100, 2, ',', '.');
-$dateLabelFormatter = clone $start;
-$dateLabel = $dateLabelFormatter->format('d.m.Y') . ' um ' . $dateLabelFormatter->format('H:i') . ' Uhr';
+$dateLabel = $start->format('d.m.Y') . ' um ' . $start->format('H:i') . ' Uhr';
 $cancelUrl = rtrim(lagohm_config()['app']['base_url'], '/') . '/api/booking-cancel.php?token=' . $cancellationToken;
 
-$body = "Hallo {$name},\n\n"
-    . "deine Buchung bei LagOHM ist bestätigt:\n\n"
-    . "Leistung: {$service['name']} ({$service['duration_minutes']} Minuten)\n"
-    . "Termin: {$dateLabel}\n"
-    . "Preis: {$priceEuro} €\n\n"
-    . "Ort:\n{$address}\n" . (lagohm_address_hint() !== '' ? lagohm_address_hint() . "\n" : '') . "\n"
-    . "Zahlung: bar oder per Überweisung, vor Ort oder im Anschluss an den Termin.\n\n"
-    . "Im Anhang findest du den Termin zum Eintragen in deinen Kalender.\n\n"
-    . "Falls du den Termin absagen musst, nutze bitte diesen Link:\n{$cancelUrl}\n\n"
-    . "Bis bald,\nHelena · LagOHM";
+if ($lang === 'en') {
+    $customerDateLabel = $start->format('j F Y') . ' at ' . $start->format('H:i');
+    $priceLabel = '€' . number_format(((int)$service['price_cents']) / 100, 2, '.', ',');
+    $subject = 'Your booking at LagOHM';
+    $body = "Hi {$name},\n\n"
+        . "your booking at LagOHM is confirmed:\n\n"
+        . "Service: {$service['name']} ({$service['duration_minutes']} minutes)\n"
+        . "Date: {$customerDateLabel}\n"
+        . "Price: {$priceLabel}\n\n"
+        . "Location:\n{$address}\n" . ($hint !== '' ? $hint . "\n" : '') . "\n"
+        . "Payment: cash or bank transfer, on site or after the appointment.\n\n"
+        . "The attached file adds the appointment to your calendar.\n\n"
+        . "If you need to cancel, please use this link:\n{$cancelUrl}\n\n"
+        . "See you soon,\nHelena · LagOHM";
+    $icsTitle = $service['name'] . ' at LagOHM';
+    $icsCancel = "Cancel: {$cancelUrl}";
+    $icsName = 'LagOHM-Appointment.ics';
+} else {
+    $customerDateLabel = $dateLabel;
+    $subject = 'Deine Buchung bei LagOHM';
+    $body = "Hallo {$name},\n\n"
+        . "deine Buchung bei LagOHM ist bestätigt:\n\n"
+        . "Leistung: {$service['name']} ({$service['duration_minutes']} Minuten)\n"
+        . "Termin: {$dateLabel}\n"
+        . "Preis: {$priceEuro} €\n\n"
+        . "Ort:\n{$address}\n" . ($hint !== '' ? $hint . "\n" : '') . "\n"
+        . "Zahlung: bar oder per Überweisung, vor Ort oder im Anschluss an den Termin.\n\n"
+        . "Im Anhang findest du den Termin zum Eintragen in deinen Kalender.\n\n"
+        . "Falls du den Termin absagen musst, nutze bitte diesen Link:\n{$cancelUrl}\n\n"
+        . "Bis bald,\nHelena · LagOHM";
+    $icsTitle = $service['name'] . ' bei LagOHM';
+    $icsCancel = "Absagen: {$cancelUrl}";
+    $icsName = 'LagOHM-Termin.ics';
+}
 
 $attachments = [];
 try {
-    $ics = Ics::booking($bookingId, $service['name'] . ' bei LagOHM', $start, $end,
-        str_replace("\n", ', ', $address), trim(lagohm_address_hint() . "\n\nAbsagen: {$cancelUrl}"));
-    $attachments[] = [$ics, 'LagOHM-Termin.ics', 'text/calendar; charset=utf-8; method=PUBLISH'];
+    $ics = Ics::booking($bookingId, $icsTitle, $start, $end,
+        str_replace("\n", ', ', $address), trim($hint . "\n\n" . $icsCancel));
+    $attachments[] = [$ics, $icsName, 'text/calendar; charset=utf-8; method=PUBLISH'];
 } catch (Throwable $e) {
     // The email still goes out without the calendar file.
 }
 
-$mailResult = Mailer::send($email, $name, 'Deine Buchung bei LagOHM', $body, $attachments);
+$mailResult = Mailer::send($email, $name, $subject, $body, $attachments);
 if ($mailResult !== true) {
     $log = $pdo->prepare('INSERT INTO booking_audit_log (booking_id, action, detail) VALUES (?, "email_failed", ?)');
     $log->execute([$bookingId, substr((string)$mailResult, 0, 490)]);
@@ -203,6 +251,7 @@ if ($owner !== '') {
         . "E-Mail: {$email}\n"
         . ($phone !== '' ? "Telefon: {$phone}\n" : '')
         . ($note !== '' ? "\nNachricht:\n{$note}\n" : '')
+        . ($lang === 'en' ? "\nSprache: Englisch (Mails an die Kundin/den Kunden gehen auf Englisch)\n" : '')
         . "\nAuf diese Mail antworten schreibt direkt an {$name}.\n"
         . "Übersicht: " . rtrim(lagohm_config()['app']['base_url'], '/') . "/admin/";
     $ownerResult = Mailer::send($owner, 'Helena',
@@ -219,6 +268,6 @@ echo json_encode([
     'booking_id' => $bookingId,
     'service' => $service['name'],
     'start' => $startUtc->format('c'),
-    'date_label' => $dateLabel,
+    'date_label' => $customerDateLabel,
     'price_eur' => $priceEuro,
 ]);

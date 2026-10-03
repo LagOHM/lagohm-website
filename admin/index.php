@@ -47,8 +47,8 @@ header('Content-Type: text/html; charset=utf-8');
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Buchungen – Admin – LagOHM</title>
-<link rel="stylesheet" href="../css/style.css?v=20261002">
-<link rel="stylesheet" href="admin.css?v=20261002">
+<link rel="stylesheet" href="../css/style.css?v=20261003">
+<link rel="stylesheet" href="admin.css?v=20261003">
 </head>
 <body>
 <header class="admin-header">
@@ -84,7 +84,10 @@ header('Content-Type: text/html; charset=utf-8');
           <td>#<?= (int)$b['id'] ?></td>
           <td><?= $start->format('d.m.Y H:i') ?></td>
           <td><?= htmlspecialchars($b['service_name'], ENT_QUOTES, 'UTF-8') ?></td>
-          <td><?= htmlspecialchars($b['customer_name'], ENT_QUOTES, 'UTF-8') ?></td>
+          <td>
+            <?= htmlspecialchars($b['customer_name'], ENT_QUOTES, 'UTF-8') ?>
+            <?php if (($b['language'] ?? 'de') === 'en'): ?><br><small>Englisch</small><?php endif; ?>
+          </td>
           <td>
             <?= htmlspecialchars($b['customer_email'], ENT_QUOTES, 'UTF-8') ?>
             <?php if ($b['customer_phone']): ?><br><?= htmlspecialchars($b['customer_phone'], ENT_QUOTES, 'UTF-8') ?><?php endif; ?>
