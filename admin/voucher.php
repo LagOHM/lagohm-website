@@ -199,7 +199,8 @@ header('Content-Type: text/html; charset=utf-8');
       <?php endif; ?>
       </div>
       <div class="voucher-foot">
-        <b><?= e($t['valid']) ?></b> · <?= e($t['code']) ?> <b><?= e($code) ?></b><br>
+        <b><?= e($t['valid']) ?></b><br>
+        <?= e($t['code']) ?> <b><?= e($code) ?></b><br>
         <?= e($t['redeem']) ?>
       </div>
     </div>
