@@ -32,7 +32,7 @@ foreach ($argv as $arg) {
 $pdo = lagohm_db();
 $hours = max(1, (int)lagohm_setting('reminder_hours_before', '24'));
 
-$select = 'SELECT b.id, b.customer_name, b.customer_email, b.start_datetime, b.cancellation_token,
+$select = 'SELECT b.id, b.customer_name, b.customer_email, b.start_datetime, b.cancellation_token, b.language,
                   s.name AS service_name, s.duration_minutes
            FROM bookings b JOIN services s ON s.id = b.service_id
            WHERE b.status = "confirmed" AND b.start_datetime > UTC_TIMESTAMP()';
@@ -77,19 +77,34 @@ foreach ($bookings as $b) {
     $start->setTimezone($tz);
     $today = new DateTime('today', $tz);
     $days = (int)$today->diff((clone $start)->setTime(0, 0))->format('%r%a');
-    $dayWord = $days === 0 ? 'heute' : ($days === 1 ? 'morgen' : 'am ' . $start->format('d.m.Y'));
     $cancelUrl = $baseUrl . '/api/booking-cancel.php?token=' . $b['cancellation_token'];
+    $lang = lagohm_lang($b['language'] ?? null);
+    $hint = lagohm_address_hint($lang);
 
-    $body = "Hallo {$b['customer_name']},\n\n"
-        . "kleine Erinnerung: {$dayWord} um {$start->format('H:i')} Uhr ist dein Termin bei LagOHM.\n\n"
-        . "Leistung: {$b['service_name']} ({$b['duration_minutes']} Minuten)\n"
-        . "Termin: {$start->format('d.m.Y')} um {$start->format('H:i')} Uhr\n\n"
-        . "Ort:\n{$address}\n" . (lagohm_address_hint() !== '' ? lagohm_address_hint() . "\n" : '') . "\n"
-        . "Falls du doch nicht kommen kannst, sag den Termin bitte über diesen Link ab:\n{$cancelUrl}\n\n"
-        . "Ich freu mich auf dich,\nHelena · LagOHM";
+    if ($lang === 'en') {
+        $dayWord = $days === 0 ? 'today' : ($days === 1 ? 'tomorrow' : 'on ' . $start->format('j F Y'));
+        $subject = 'Reminder: your appointment at LagOHM';
+        $body = "Hi {$b['customer_name']},\n\n"
+            . "a quick reminder: your appointment at LagOHM is {$dayWord} at {$start->format('H:i')}.\n\n"
+            . "Service: {$b['service_name']} ({$b['duration_minutes']} minutes)\n"
+            . "Date: {$start->format('j F Y')} at {$start->format('H:i')}\n\n"
+            . "Location:\n{$address}\n" . ($hint !== '' ? $hint . "\n" : '') . "\n"
+            . "If you can't make it after all, please cancel using this link:\n{$cancelUrl}\n\n"
+            . "Looking forward to seeing you,\nHelena · LagOHM";
+    } else {
+        $dayWord = $days === 0 ? 'heute' : ($days === 1 ? 'morgen' : 'am ' . $start->format('d.m.Y'));
+        $subject = 'Erinnerung an deinen Termin bei LagOHM';
+        $body = "Hallo {$b['customer_name']},\n\n"
+            . "kleine Erinnerung: {$dayWord} um {$start->format('H:i')} Uhr ist dein Termin bei LagOHM.\n\n"
+            . "Leistung: {$b['service_name']} ({$b['duration_minutes']} Minuten)\n"
+            . "Termin: {$start->format('d.m.Y')} um {$start->format('H:i')} Uhr\n\n"
+            . "Ort:\n{$address}\n" . ($hint !== '' ? $hint . "\n" : '') . "\n"
+            . "Falls du doch nicht kommen kannst, sag den Termin bitte über diesen Link ab:\n{$cancelUrl}\n\n"
+            . "Ich freu mich auf dich,\nHelena · LagOHM";
+    }
 
     try {
-        $result = Mailer::send($b['customer_email'], $b['customer_name'], 'Erinnerung an deinen Termin bei LagOHM', $body);
+        $result = Mailer::send($b['customer_email'], $b['customer_name'], $subject, $body);
     } catch (Throwable $e) {
         $result = $e->getMessage();
     }

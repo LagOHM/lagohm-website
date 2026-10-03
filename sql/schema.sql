@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   customer_email VARCHAR(190) NOT NULL,
   customer_phone VARCHAR(40) NULL,
   customer_note TEXT NULL,
+  language CHAR(2) NOT NULL DEFAULT 'de',
   start_datetime DATETIME NOT NULL, -- stored in UTC
   end_datetime DATETIME NOT NULL,   -- stored in UTC
   status ENUM('confirmed','cancelled') NOT NULL DEFAULT 'confirmed',

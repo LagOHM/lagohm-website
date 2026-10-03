@@ -22,6 +22,34 @@
   const inputDate = document.getElementById('booking-input-date');
   const inputTime = document.getElementById('booking-input-time');
 
+  const lang = document.documentElement.lang === 'en' ? 'en' : 'de';
+  const T = {
+    de: {
+      loading: 'Lade freie Termine …',
+      noSlots: 'An diesem Tag sind leider keine freien Termine mehr verfügbar. Bitte ein anderes Datum wählen.',
+      slotsFailed: 'Freie Termine konnten nicht geladen werden. Bitte versuch es gleich nochmal.',
+      minutes: 'Minuten',
+      at: (date, time) => `${date} um ${time} Uhr`,
+      locale: 'de-DE',
+      dateFormat: { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' },
+      success: (service, when) => `<h3>Dein Termin ist bestätigt!</h3><p>${service} am ${when}.<br>Eine Bestätigung ist unterwegs an deine E-Mail-Adresse.</p>`,
+      taken: 'Dieser Termin ist leider gerade nicht mehr frei. Bitte eine andere Zeit wählen.',
+      failed: 'Die Buchung konnte nicht abgeschickt werden. Bitte versuch es nochmal.',
+    },
+    en: {
+      loading: 'Loading available times …',
+      noSlots: 'Sorry, there are no free times left on this day. Please choose another date.',
+      slotsFailed: 'Available times could not be loaded. Please try again in a moment.',
+      minutes: 'minutes',
+      at: (date, time) => `${date} at ${time}`,
+      locale: 'en-GB',
+      dateFormat: { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' },
+      success: (service, when) => `<h3>Your appointment is confirmed!</h3><p>${service} on ${when}.<br>A confirmation is on its way to your email address.</p>`,
+      taken: 'Sorry, this time has just been taken. Please choose another one.',
+      failed: 'The booking could not be sent. Please try again.',
+    },
+  }[lang];
+
   let selected = { service: null, serviceName: null, duration: null, price: null };
 
   function toYmd(date) {
@@ -64,7 +92,7 @@
 
   function loadSlots() {
     if (!selected.service || !dateInput.value) return;
-    slotsContainer.innerHTML = '<p class="booking-loading">Lade freie Termine …</p>';
+    slotsContainer.innerHTML = `<p class="booking-loading">${T.loading}</p>`;
 
     const url = `${slotsUrl}?service=${encodeURIComponent(selected.service)}&date=${encodeURIComponent(dateInput.value)}`;
     fetch(url)
@@ -72,7 +100,7 @@
       .then((data) => {
         slotsContainer.innerHTML = '';
         if (!data.slots || data.slots.length === 0) {
-          slotsContainer.innerHTML = '<p class="booking-no-slots">An diesem Tag sind leider keine freien Termine mehr verfügbar. Bitte ein anderes Datum wählen.</p>';
+          slotsContainer.innerHTML = `<p class="booking-no-slots">${T.noSlots}</p>`;
           return;
         }
         data.slots.forEach((time) => {
@@ -85,13 +113,13 @@
         });
       })
       .catch(() => {
-        slotsContainer.innerHTML = '<p class="booking-no-slots">Freie Termine konnten nicht geladen werden. Bitte versuch es gleich nochmal.</p>';
+        slotsContainer.innerHTML = `<p class="booking-no-slots">${T.slotsFailed}</p>`;
       });
   }
 
   function formatDateLabel(ymd) {
     const d = new Date(ymd + 'T00:00:00');
-    return d.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+    return d.toLocaleDateString(T.locale, T.dateFormat);
   }
 
   function selectSlot(time) {
@@ -99,8 +127,8 @@
     inputDate.value = dateInput.value;
     inputTime.value = time;
 
-    summaryEl.innerHTML = `<strong>${selected.serviceName}</strong> (${selected.duration} Minuten)<br>`
-      + `${formatDateLabel(dateInput.value)} um ${time} Uhr<br>`
+    summaryEl.innerHTML = `<strong>${selected.serviceName}</strong> (${selected.duration} ${T.minutes})<br>`
+      + `${T.at(formatDateLabel(dateInput.value), time)}<br>`
       + `${selected.price}`;
 
     errorEl.hidden = true;
@@ -133,6 +161,7 @@
       note: form.querySelector('[name="note"]').value,
       website: form.querySelector('[name="website"]').value,
       gdpr_consent: form.querySelector('[name="gdpr_consent"]').checked,
+      lang,
     };
 
     fetch(createUrl, {
@@ -151,17 +180,16 @@
         form.reset();
         form.hidden = true;
         successEl.hidden = false;
-        successEl.innerHTML = `<h3>Dein Termin ist bestätigt!</h3>`
-          + `<p>${data.service} am ${data.date_label}.<br>Eine Bestätigung ist unterwegs an deine E-Mail-Adresse.</p>`;
+        successEl.innerHTML = T.success(data.service, data.date_label);
       })
       .catch((err) => {
         if (err && err.status === 409) {
-          showError('Dieser Termin ist leider gerade nicht mehr frei. Bitte eine andere Zeit wählen.');
+          showError(T.taken);
           form.hidden = true;
           dateStep.hidden = false;
           loadSlots();
         } else {
-          const msg = (err && err.data && err.data.error) || 'Die Buchung konnte nicht abgeschickt werden. Bitte versuch es nochmal.';
+          const msg = (err && err.data && err.data.error) || T.failed;
           showError(msg);
         }
       })

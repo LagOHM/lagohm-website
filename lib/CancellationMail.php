@@ -18,7 +18,7 @@ final class CancellationMail
     {
         try {
             $pdo = lagohm_db();
-            $stmt = $pdo->prepare('SELECT b.customer_name, b.customer_email, b.start_datetime, s.name AS service_name
+            $stmt = $pdo->prepare('SELECT b.customer_name, b.customer_email, b.start_datetime, b.language, s.name AS service_name
                                    FROM bookings b JOIN services s ON s.id = b.service_id WHERE b.id = ?');
             $stmt->execute([$bookingId]);
             $b = $stmt->fetch();
@@ -35,20 +35,40 @@ final class CancellationMail
             $when = $start->format('d.m.Y') . ' um ' . $start->format('H:i') . ' Uhr';
             $baseUrl = rtrim(lagohm_config()['app']['base_url'], '/');
 
-            if ($cancelledBy === self::BY_CUSTOMER) {
-                $body = "Hallo {$b['customer_name']},\n\n"
-                    . "dein Termin am {$when} ({$b['service_name']}) wurde storniert.\n\n"
-                    . "Falls du ihn in deinen Kalender eingetragen hast, lösch ihn dort bitte auch.\n\n"
-                    . "Du kannst jederzeit einen neuen Termin buchen: {$baseUrl}\n\n"
-                    . "Alles Liebe,\nHelena · LagOHM";
+            $lang = lagohm_lang($b['language'] ?? null);
+            if ($lang === 'en') {
+                $whenEn = $start->format('j F Y') . ' at ' . $start->format('H:i');
+                $subject = 'Your appointment at LagOHM has been cancelled';
+                if ($cancelledBy === self::BY_CUSTOMER) {
+                    $body = "Hi {$b['customer_name']},\n\n"
+                        . "your appointment on {$whenEn} ({$b['service_name']}) has been cancelled.\n\n"
+                        . "If you added it to your calendar, please delete it there too.\n\n"
+                        . "You can book a new appointment any time: {$baseUrl}/en/\n\n"
+                        . "All the best,\nHelena · LagOHM";
+                } else {
+                    $body = "Hi {$b['customer_name']},\n\n"
+                        . "unfortunately I have to cancel your appointment on {$whenEn} ({$b['service_name']}). I'm sorry!\n\n"
+                        . "If you added it to your calendar, please delete it there.\n\n"
+                        . "Feel free to book a new appointment at {$baseUrl}/en/ or just message me.\n\n"
+                        . "All the best,\nHelena · LagOHM";
+                }
             } else {
-                $body = "Hallo {$b['customer_name']},\n\n"
-                    . "leider muss ich deinen Termin am {$when} ({$b['service_name']}) absagen. Das tut mir leid!\n\n"
-                    . "Falls du ihn in deinen Kalender eingetragen hast, lösch ihn dort bitte.\n\n"
-                    . "Buch dir gern einen neuen Termin unter {$baseUrl} oder schreib mir einfach.\n\n"
-                    . "Alles Liebe,\nHelena · LagOHM";
+                $subject = 'Dein Termin bei LagOHM wurde storniert';
+                if ($cancelledBy === self::BY_CUSTOMER) {
+                    $body = "Hallo {$b['customer_name']},\n\n"
+                        . "dein Termin am {$when} ({$b['service_name']}) wurde storniert.\n\n"
+                        . "Falls du ihn in deinen Kalender eingetragen hast, lösch ihn dort bitte auch.\n\n"
+                        . "Du kannst jederzeit einen neuen Termin buchen: {$baseUrl}\n\n"
+                        . "Alles Liebe,\nHelena · LagOHM";
+                } else {
+                    $body = "Hallo {$b['customer_name']},\n\n"
+                        . "leider muss ich deinen Termin am {$when} ({$b['service_name']}) absagen. Das tut mir leid!\n\n"
+                        . "Falls du ihn in deinen Kalender eingetragen hast, lösch ihn dort bitte.\n\n"
+                        . "Buch dir gern einen neuen Termin unter {$baseUrl} oder schreib mir einfach.\n\n"
+                        . "Alles Liebe,\nHelena · LagOHM";
+                }
             }
-            $customerEmailed = self::deliver($bookingId, $b['customer_email'], $b['customer_name'], 'Dein Termin bei LagOHM wurde storniert', $body);
+            $customerEmailed = self::deliver($bookingId, $b['customer_email'], $b['customer_name'], $subject, $body);
 
             if ($cancelledBy === self::BY_CUSTOMER) {
                 $owner = (string)(lagohm_config()['smtp']['from_email'] ?? '');
