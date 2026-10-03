@@ -113,3 +113,28 @@ INSERT INTO app_settings (setting_key, setting_value) VALUES
   ('max_horizon_days', '60'),
   ('reminder_hours_before', '24')
 ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value);
+
+-- Gift vouchers (also created automatically by lagohm_migrate() in lib/db.php).
+-- No names or messages are stored; those only go into the PDF.
+CREATE TABLE IF NOT EXISTS vouchers (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  code VARCHAR(20) NOT NULL,
+  type VARCHAR(10) NOT NULL, -- massage|yoga|value
+  amount_cents INT UNSIGNED NULL, -- value vouchers only
+  language CHAR(2) NOT NULL DEFAULT 'de',
+  issued_on DATE NOT NULL,
+  valid_until DATE NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_vouchers_code (code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS voucher_redemptions (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  voucher_id INT UNSIGNED NOT NULL,
+  amount_cents INT UNSIGNED NULL, -- value vouchers: amount used; NULL = service voucher redeemed
+  redeemed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_redemptions_voucher (voucher_id),
+  CONSTRAINT fk_redemptions_voucher FOREIGN KEY (voucher_id) REFERENCES vouchers(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

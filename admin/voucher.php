@@ -7,10 +7,13 @@ require_once __DIR__ . '/../lib/Auth.php';
 lagohm_config();
 Auth::requireLogin();
 
+require_once __DIR__ . '/../lib/Csrf.php';
+
 /**
- * Gift voucher generator: fill in the form, check the preview, then "Als PDF speichern"
- * (the browser's print dialog, page size A5 landscape). Nothing is stored; vouchers are
- * sold and tracked by Helena by email.
+ * Gift voucher generator: fill in the form, check the preview, then "Speichern & PDF erstellen"
+ * stores the voucher in the register (vouchers.php) and opens the print dialog (A5 landscape).
+ * Names and the greeting are only rendered into the PDF, never stored. The form is POSTed so
+ * they don't end up in URLs or server logs either.
  */
 
 function e(string $s): string
@@ -30,15 +33,53 @@ function voucher_code(): string
 
 $tz = new DateTimeZone(lagohm_config()['app']['timezone'] ?? 'Europe/Berlin');
 
-$lang = ($_GET['lang'] ?? 'de') === 'en' ? 'en' : 'de';
-$type = in_array($_GET['type'] ?? '', ['massage', 'yoga', 'value'], true) ? $_GET['type'] : 'massage';
-$amount = max(0, (int)($_GET['amount'] ?? 60));
-$for = trim((string)($_GET['for'] ?? ''));
-$from = trim((string)($_GET['from'] ?? ''));
-$message = trim((string)($_GET['message'] ?? ''));
-$code = preg_match('/^[A-Z0-9-]{4,20}$/', (string)($_GET['code'] ?? '')) ? (string)$_GET['code'] : voucher_code();
-$issued = DateTime::createFromFormat('!Y-m-d', (string)($_GET['issued'] ?? ''), $tz) ?: new DateTime('today', $tz);
+$pdo = lagohm_db();
+$in = $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : [];
+$notice = null;
+$error = null;
+$autoPrint = false;
+
+// Reprint from the register: start from the stored voucher (names have to be typed in again).
+if (!$in && isset($_GET['reprint'])) {
+    $stmt = $pdo->prepare('SELECT * FROM vouchers WHERE id = ?');
+    $stmt->execute([(int)$_GET['reprint']]);
+    if ($v = $stmt->fetch()) {
+        $in = [
+            'type' => $v['type'], 'lang' => $v['language'], 'code' => $v['code'], 'issued' => $v['issued_on'],
+            'amount' => $v['amount_cents'] !== null ? (int)($v['amount_cents'] / 100) : 60,
+        ];
+        $notice = 'Nachdruck von ' . $v['code'] . '. Namen und Grußtext bei Bedarf neu eintragen.';
+    }
+}
+
+$lang = ($in['lang'] ?? 'de') === 'en' ? 'en' : 'de';
+$type = in_array($in['type'] ?? '', ['massage', 'yoga', 'value'], true) ? $in['type'] : 'massage';
+$amount = max(0, (int)($in['amount'] ?? 60));
+$for = trim((string)($in['for'] ?? ''));
+$from = trim((string)($in['from'] ?? ''));
+$message = trim((string)($in['message'] ?? ''));
+$code = preg_match('/^[A-Z0-9-]{4,20}$/', (string)($in['code'] ?? '')) ? (string)$in['code'] : voucher_code();
+$issued = DateTime::createFromFormat('!Y-m-d', (string)($in['issued'] ?? ''), $tz) ?: new DateTime('today', $tz);
 $validUntil = new DateTime(((int)$issued->format('Y') + 3) . '-12-31', $tz); // 3 years until year end
+
+if (($in['action'] ?? '') === 'save') {
+    if (!Csrf::verify($in['csrf_token'] ?? null)) {
+        $error = 'Sitzung abgelaufen, bitte Seite neu laden.';
+    } elseif ($type === 'value' && $amount < 1) {
+        $error = 'Bitte einen Betrag für den Wertgutschein eintragen.';
+    } else {
+        $exists = $pdo->prepare('SELECT id FROM vouchers WHERE code = ?');
+        $exists->execute([$code]);
+        if ($exists->fetch()) {
+            $notice = 'Gutschein ' . $code . ' ist bereits in der Liste gespeichert.';
+        } else {
+            $pdo->prepare('INSERT INTO vouchers (code, type, amount_cents, language, issued_on, valid_until) VALUES (?, ?, ?, ?, ?, ?)')
+                ->execute([$code, $type, $type === 'value' ? $amount * 100 : null, $lang, $issued->format('Y-m-d'), $validUntil->format('Y-m-d')]);
+            $notice = 'Gutschein ' . $code . ' gespeichert ✓ – im Druckfenster „Als PDF speichern“ wählen.';
+        }
+        $autoPrint = true;
+    }
+}
 
 $months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 $t = $lang === 'en'
@@ -130,17 +171,21 @@ header('Content-Type: text/html; charset=utf-8');
       <a href="index.php">Buchungen</a>
       <a href="availability.php">Verfügbarkeit</a>
       <a href="calendar.php">Kalender</a>
-      <a href="voucher.php" class="active">Gutscheine</a>
+      <a href="vouchers.php" class="active">Gutscheine</a>
       <a href="settings.php">Einstellungen</a>
       <a href="logout.php">Logout</a>
     </nav>
   </div>
 </header>
 <main class="wrap admin-main">
+  <p><a class="back" href="vouchers.php">← Zur Gutschein-Liste</a></p>
   <h1>Gutschein erstellen</h1>
-  <p class="admin-note">Angaben ausfüllen, „Vorschau aktualisieren“, dann „Als PDF speichern“ und das PDF an die Mail hängen. Im Druckfenster als Ziel „Als PDF speichern“ wählen; die Seitengröße A5 quer ist voreingestellt. Gespeichert wird hier nichts – notier dir die Gutschein-Nr., wenn du den Überblick behalten möchtest.</p>
+  <p class="admin-note">Angaben ausfüllen, „Vorschau aktualisieren“, dann „Speichern &amp; PDF erstellen“: Der Gutschein kommt in die Liste, und das Druckfenster öffnet sich – dort als Ziel „Als PDF speichern“ wählen (A5 quer, Ränder: keine, Hintergrundgrafiken an). In der Liste werden nur Nummer, Art, Betrag und Daten gespeichert; Namen und Grußtext stehen nur im PDF.</p>
+  <?php if ($error): ?><p class="admin-error"><?= e($error) ?></p><?php endif; ?>
+  <?php if ($notice): ?><p class="admin-success"><?= e($notice) ?></p><?php endif; ?>
 
-  <form method="get" class="voucher-form">
+  <form method="post" class="voucher-form">
+    <input type="hidden" name="csrf_token" value="<?= e(Csrf::token()) ?>">
     <label>Art
       <select name="type">
         <option value="massage" <?= $type === 'massage' ? 'selected' : '' ?>>Massage · 90 Min.</option>
@@ -173,8 +218,8 @@ header('Content-Type: text/html; charset=utf-8');
       <input type="text" name="code" maxlength="20" value="<?= e($code) ?>">
     </label>
     <div class="voucher-actions wide">
-      <button type="submit" class="btn btn-primary">Vorschau aktualisieren</button>
-      <button type="button" class="btn btn-primary" onclick="window.print()">Als PDF speichern</button>
+      <button type="submit" name="action" value="preview" class="btn btn-ghost">Vorschau aktualisieren</button>
+      <button type="submit" name="action" value="save" class="btn btn-primary">Speichern &amp; PDF erstellen</button>
       <a class="btn btn-ghost" href="voucher.php">Neuer Gutschein</a>
     </div>
   </form>
@@ -209,5 +254,8 @@ header('Content-Type: text/html; charset=utf-8');
     </div>
   </div>
 </main>
+<?php if ($autoPrint): ?>
+<script>window.addEventListener('load', function () { setTimeout(function () { window.print(); }, 300); });</script>
+<?php endif; ?>
 </body>
 </html>

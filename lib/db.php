@@ -36,11 +36,39 @@ function lagohm_db(): PDO
  * Small schema upgrades applied automatically (there is no working mysql CLI on the host).
  * Each step checks first, so this is a cheap no-op once applied.
  */
+// Gift vouchers issued in the admin area. No names or messages are stored (those only go into the PDF).
+const LAGOHM_SQL_VOUCHERS = "CREATE TABLE IF NOT EXISTS vouchers (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  code VARCHAR(20) NOT NULL,
+  type VARCHAR(10) NOT NULL, -- massage|yoga|value
+  amount_cents INT UNSIGNED NULL, -- value vouchers only
+  language CHAR(2) NOT NULL DEFAULT 'de',
+  issued_on DATE NOT NULL,
+  valid_until DATE NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_vouchers_code (code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+const LAGOHM_SQL_VOUCHER_REDEMPTIONS = "CREATE TABLE IF NOT EXISTS voucher_redemptions (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  voucher_id INT UNSIGNED NOT NULL,
+  amount_cents INT UNSIGNED NULL, -- value vouchers: amount used; NULL = service voucher redeemed
+  redeemed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_redemptions_voucher (voucher_id),
+  CONSTRAINT fk_redemptions_voucher FOREIGN KEY (voucher_id) REFERENCES vouchers(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
 function lagohm_migrate(PDO $pdo): void
 {
     try {
         if (!$pdo->query("SHOW COLUMNS FROM bookings LIKE 'language'")->fetch()) {
             $pdo->exec("ALTER TABLE bookings ADD COLUMN language CHAR(2) NOT NULL DEFAULT 'de' AFTER customer_note");
+        }
+        if (!$pdo->query("SHOW TABLES LIKE 'vouchers'")->fetch()) {
+            $pdo->exec(LAGOHM_SQL_VOUCHERS);
+            $pdo->exec(LAGOHM_SQL_VOUCHER_REDEMPTIONS);
         }
     } catch (Throwable $e) {
         // Tables not created yet (fresh install) — sql/schema.sql has the column.
