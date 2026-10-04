@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS booking_audit_log (
 
 INSERT INTO services (slug, name, duration_minutes, price_cents, buffer_minutes, active)
 VALUES
-  ('yoga', 'Yoga', 75, 6000, 30, 1),
+  ('yoga', 'Yoga', 75, 7500, 30, 1),
   ('massage', 'Massage', 90, 12000, 30, 1)
 ON DUPLICATE KEY UPDATE name = VALUES(name);
 
