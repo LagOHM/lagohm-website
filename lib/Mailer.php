@@ -40,10 +40,10 @@ final class Mailer
                 $mail->addReplyTo($replyTo[0], $replyTo[1] ?? '');
             }
 
-            $logoPath = __DIR__ . '/../images/logo.png';
+            $logoPath = __DIR__ . '/../images/brand/lagohm-mail-logo.png';
             $hasLogo = is_file($logoPath);
             if ($hasLogo) {
-                $mail->addEmbeddedImage($logoPath, 'lagohm-logo', 'logo.png');
+                $mail->addEmbeddedImage($logoPath, 'lagohm-logo', 'lagohm-logo.png');
             }
 
             $mail->isHTML(true);
@@ -64,7 +64,7 @@ final class Mailer
     private static function renderHtml(string $bodyText, bool $hasLogo): string
     {
         $logoHtml = $hasLogo
-            ? '<img src="cid:lagohm-logo" alt="LagOHM" width="64" height="64" style="display:block;border-radius:16px;">'
+            ? '<img src="cid:lagohm-logo" alt="LagOHM" width="64" height="64" style="display:block;">'
             : '';
         $bodyHtml = nl2br(htmlspecialchars($bodyText, ENT_QUOTES, 'UTF-8'));
 

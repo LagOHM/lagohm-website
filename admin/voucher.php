@@ -119,8 +119,8 @@ header('Content-Type: text/html; charset=utf-8');
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gutschein <?= e($code) ?> – Admin – LagOHM</title>
-<link rel="stylesheet" href="../css/style.css?v=20261004-3">
-<link rel="stylesheet" href="admin.css?v=20261004-3">
+<link rel="stylesheet" href="../css/style.css?v=20261004-4">
+<link rel="stylesheet" href="admin.css?v=20261004-4">
 <style>
   .voucher-form{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px 20px; max-width: 760px; }
   .voucher-form .wide{ grid-column: 1 / -1; }
@@ -146,7 +146,9 @@ header('Content-Type: text/html; charset=utf-8');
     background: linear-gradient(160deg, #7A2A1D, var(--accent-1) 55%, var(--accent-2));
     display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 13mm; color:#fff; text-align:center;
   }
-  .voucher-side img{ width: 58%; }
+  .voucher-side img{ width: 46%; }
+  .voucher-word{ font-family: var(--serif); font-weight: 600; font-size: 13mm; line-height: 1; margin-top: 8mm; letter-spacing: -.2mm; }
+  .voucher-word span{ color: #FBD3B4; }
   .voucher-body{ padding: 16mm 17mm 13mm; display:flex; flex-direction:column; color: var(--ink); }
   .voucher-main{ flex:1; display:flex; flex-direction:column; justify-content:center; }
   .voucher-eyebrow{ font-size: 4.2mm; letter-spacing: .18em; text-transform: uppercase; color: var(--accent-1); font-weight: 700; }
@@ -233,7 +235,8 @@ header('Content-Type: text/html; charset=utf-8');
   <div class="voucher-scroll"><div class="voucher-page">
   <div class="voucher">
     <div class="voucher-side">
-      <img src="../images/logo-white.svg" alt="LagOHM">
+      <img src="../images/icon-mark-white.svg" alt="">
+      <div class="voucher-word">LagOHM<span>.</span></div>
     </div>
     <div class="voucher-body">
       <div class="voucher-main">
