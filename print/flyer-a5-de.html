@@ -6,8 +6,9 @@
 <!--
   Print template: A5 flyer, two pages (front / back), 148 × 210 mm plus 3 mm bleed on every
   side = 154 × 216 mm per page, as online print shops expect. Keep text inside the safe area.
-  Front: what LagOHM is at a glance (Yoga & Massage · München-Harlaching).
-  Back: "Zwei Wege, bei dir anzukommen." – massage and private yoga, one photo each.
+  Design language of the website: warm sand ground, photos as rounded cards, the logo mark
+  without lettering, the massage (spiral) and yoga (bowl) icons as recurring elements –
+  in gradient badges and as large, faint watermarks.
   Photos (print resolution, no metadata): print/img-*.jpg. Rendered to PDF with print/build-flyer.ps1.
 -->
 <style>
@@ -16,8 +17,8 @@
   @font-face{ font-family:'Manrope'; font-style:normal; font-weight:400 700; src:url(../fonts/manrope-normal-latin.woff2) format('woff2'); }
 
   :root{
-    --bg:#FBF4EF; --bg-card:#F6E9E0; --ink:#2B1B16; --ink-soft:#7C6459; --line:#E9D9CC;
-    --accent-1:#C6432B; --accent-2:#EFA05E;
+    --sand:#F1DFCE; --cream:#FBF4EF; --ink:#2B1B16; --ink-soft:#6F5447; --line:#E3CBB6;
+    --accent-1:#C6432B; --accent-2:#EFA05E; --deep:#8A3020;
     --grad: linear-gradient(135deg, var(--accent-1), var(--accent-2));
     --serif:"Fraunces", Georgia, serif; --sans:"Manrope", Arial, sans-serif;
   }
@@ -27,98 +28,122 @@
   body{ font-family: var(--sans); color: var(--ink); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .page{
     width:154mm; height:216mm; overflow:hidden; position:relative;
-    background: var(--bg); margin: 0 auto 10mm; page-break-after: always; break-after: page;
+    background: var(--sand); margin: 0 auto 10mm; page-break-after: always; break-after: page;
   }
   .page:last-child{ page-break-after: auto; break-after: auto; margin-bottom:0; }
   @media screen{ .page{ box-shadow: 0 10px 40px rgba(0,0,0,.18); } body{ padding: 10mm 0; } }
   @media print{ html, body{ background:none; } }
 
-  .brand-mark{ width:11mm; height:11mm; border-radius:3mm; background:var(--grad); display:flex; align-items:center; justify-content:center; }
-  .brand-mark img{ width:6.4mm; }
-  .brand-name{ font-family:var(--serif); font-weight:600; font-size:6.4mm; }
-  .brand-name span{ color: var(--accent-1); }
+  /* Large faint icon watermarks (coloured via CSS mask, so the white SVGs can be tinted) */
+  .watermark{ position:absolute; background: var(--accent-1); opacity:.09; -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; pointer-events:none; }
+  .wm-massage{ --icon: url(../images/icon-massage-white.svg); }
+  .wm-yoga{ --icon: url(../images/icon-yoga-white.svg); }
+  .wm-mark{ --icon: url(../images/icon-mark-white.svg); }
 
-  /* Front */
-  .front-photo{ position:absolute; inset:0 0 auto 0; height:152mm; background: url(img-front-massage.jpg) center bottom / cover no-repeat; }
-  .front-photo::after{ content:""; position:absolute; inset:auto 0 0 0; height:9mm; background: linear-gradient(to bottom, rgba(251,244,239,0), var(--bg)); }
-  .front-brand{ position:absolute; top:11mm; left:12mm; display:flex; align-items:center; gap:3mm; padding: 2mm 4mm 2mm 2mm; border-radius:4mm; background: rgba(251,244,239,.9); }
-  .front-body{ position:absolute; inset:149mm 0 0 0; padding: 0 14mm 10mm; display:flex; flex-direction:column; }
-  .what{ font-size:4.6mm; letter-spacing:.14em; text-transform:uppercase; font-weight:700; color: var(--accent-1); }
-  .what span{ display:block; font-size:3.1mm; letter-spacing:.18em; color: var(--ink-soft); margin-top:.8mm; }
-  h1{ font-family:var(--serif); font-weight:600; font-size:8.6mm; line-height:1.05; margin: 2.6mm 0 2.2mm; }
+  .badge{ display:inline-flex; align-items:center; justify-content:center; background: var(--grad); flex:none; }
+  .badge img{ display:block; }
+
+  /* ---------- Front ---------- */
+  .front{ padding: 11mm 11mm 10mm; display:flex; flex-direction:column; }
+  .front .wm-massage{ width:92mm; height:92mm; right:-26mm; bottom:-22mm; }
+  .photo-card{ position:relative; flex:none; height:127mm; border-radius:6mm; background: url(img-front-massage.jpg) center 45% / cover no-repeat; box-shadow: 0 6mm 12mm -8mm rgba(80,30,15,.45); }
+  .photo-card .logo{ position:absolute; right:6mm; bottom:-9mm; width:20mm; height:20mm; border-radius:5mm; box-shadow: 0 3mm 7mm -3mm rgba(80,30,15,.5); }
+  .photo-card .logo img{ width:12mm; }
+  .front-text{ position:relative; padding: 12.5mm 3mm 0; flex:1; display:flex; flex-direction:column; }
+  h1{ font-family:var(--serif); font-weight:600; font-size:9.2mm; line-height:1.04; margin:0; }
   h1 em{ font-style:italic; font-weight:500; color: var(--accent-1); }
-  .lede{ font-size:3.5mm; line-height:1.5; color: var(--ink-soft); margin:0; }
-  .front-foot{ margin-top:auto; display:flex; justify-content:space-between; align-items:flex-end; font-size:3.4mm; color: var(--ink-soft); }
-  .front-foot strong{ color: var(--ink); font-size:4.2mm; }
+  .offers-mini{ display:flex; gap:7mm; margin: 4mm 0 3.4mm; }
+  .offers-mini span{ display:flex; align-items:center; gap:2.6mm; font-family:var(--serif); font-weight:600; font-size:5.2mm; }
+  .offers-mini .badge{ width:10mm; height:10mm; border-radius:2.8mm; }
+  .offers-mini .badge img{ width:6.2mm; }
+  .lede{ font-size:3.5mm; line-height:1.5; color: var(--ink-soft); margin:0; max-width:112mm; }
+  .front-foot{ margin-top:auto; display:flex; justify-content:space-between; align-items:flex-end; font-size:3.3mm; color: var(--ink-soft); letter-spacing:.06em; text-transform:uppercase; font-weight:700; }
+  .front-foot strong{ color: var(--ink); font-size:4.4mm; letter-spacing:0; text-transform:none; }
 
-  /* Back */
-  .back{ padding: 13mm 14mm 11mm; display:flex; flex-direction:column; }
-  h2{ font-family:var(--serif); font-weight:600; font-size:7.6mm; line-height:1.1; margin: 0 0 5mm; }
+  /* ---------- Back ---------- */
+  .back{ padding: 12mm 12mm 10mm; display:flex; flex-direction:column; }
+  .back .wm-yoga{ width:80mm; height:80mm; left:-24mm; top:-20mm; }
+  .back .wm-mark{ width:60mm; height:60mm; right:-14mm; bottom:34mm; opacity:.06; }
+  .back-head{ position:relative; display:flex; align-items:center; gap:4mm; margin-bottom:5mm; }
+  .back-head .badge{ width:13mm; height:13mm; border-radius:3.5mm; }
+  .back-head .badge img{ width:8mm; }
+  h2{ font-family:var(--serif); font-weight:600; font-size:7.2mm; line-height:1.08; margin:0; }
   h2 em{ font-style:italic; font-weight:500; color: var(--accent-1); }
-  .offer{ display:flex; gap:5mm; align-items:stretch; }
-  .offer + .offer{ margin-top:5mm; padding-top:5mm; border-top:0.3mm solid var(--line); }
-  .offer-photo{ flex:none; width:37mm; height:49mm; border-radius:3.5mm; background-size:cover; background-position:center; }
-  .offer-text{ display:flex; flex-direction:column; justify-content:center; }
-  .offer-head{ font-size:3.3mm; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color: var(--accent-1); }
-  .offer-title{ font-family:var(--serif); font-weight:600; font-size:5.6mm; margin: 1mm 0 .6mm; }
-  .offer-meta{ font-size:3.1mm; color: var(--ink-soft); margin-bottom:1.8mm; }
-  .offer p{ margin:0; font-size:3.35mm; line-height:1.48; }
-  .offer p b{ font-weight:700; }
-  .extras{ margin: 5mm 0 0; font-size:3.3mm; color: var(--ink-soft); text-align:center; }
+  .card{ position:relative; display:flex; gap:4.5mm; padding:3.5mm; background: var(--cream); border-radius:5mm; box-shadow: 0 4mm 9mm -7mm rgba(80,30,15,.35); }
+  .card + .card{ margin-top:4mm; }
+  .card-photo{ flex:none; width:34mm; height:45mm; border-radius:3.5mm; background-size:cover; background-position:center; }
+  .card-text{ display:flex; flex-direction:column; justify-content:center; padding-right:1mm; }
+  .card-top{ display:flex; align-items:center; gap:2.4mm; }
+  .card-top .badge{ width:8mm; height:8mm; border-radius:2.2mm; }
+  .card-top .badge img{ width:5mm; }
+  .card-title{ font-family:var(--serif); font-weight:600; font-size:5.2mm; line-height:1.1; }
+  .card-price{ margin: 1.6mm 0 .8mm; font-size:3.1mm; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color: var(--accent-1); }
+  .card-meta{ font-size:3mm; color: var(--ink-soft); margin-bottom:1.6mm; }
+  .card p{ margin:0; font-size:3.25mm; line-height:1.46; }
+  .card p b{ font-weight:700; }
+  .extras{ position:relative; margin: 4.5mm 0 0; font-size:3.3mm; color: var(--ink-soft); text-align:center; }
   .extras b{ color: var(--ink); }
   .book{
-    margin-top:auto; display:flex; gap:4.5mm; align-items:center; padding: 4.5mm;
-    border-radius: 4mm; background: linear-gradient(135deg, #7A2A1D, var(--accent-1) 60%, var(--accent-2)); color:#fff;
+    position:relative; margin-top:auto; display:flex; gap:4.5mm; align-items:center; padding: 4.5mm;
+    border-radius: 5mm; background: linear-gradient(135deg, #7A2A1D, var(--accent-1) 60%, var(--accent-2)); color:#fff;
   }
   .book img{ width:22mm; height:22mm; border-radius:2mm; background:#fff; padding:1mm; flex:none; }
   .book-title{ font-family:var(--serif); font-weight:600; font-size:5.6mm; line-height:1.15; }
   .book p{ margin: 1.2mm 0 0; font-size:3.2mm; line-height:1.45; opacity:.95; }
   .book .url{ font-weight:700; font-size:4.1mm; margin-top:1.4mm; opacity:1; }
-  .back-foot{ display:flex; justify-content:space-between; align-items:center; gap:4mm; margin-top:4mm; font-size:3.2mm; color: var(--ink-soft); }
+  .back-foot{ position:relative; display:flex; justify-content:space-between; align-items:center; gap:4mm; margin-top:4mm; font-size:3.2mm; color: var(--ink-soft); }
   .back-foot em{ font-family:var(--serif); font-style:italic; color: var(--ink); }
   .insta{ display:flex; align-items:center; gap:1.6mm; color: var(--ink); font-weight:600; }
   .insta svg{ width:4.4mm; height:4.4mm; }
-  .trained{ margin-top:2.2mm; font-size:2.9mm; color: var(--ink-soft); text-align:center; }
+  .trained{ position:relative; margin-top:2.2mm; font-size:2.9mm; color: var(--ink-soft); text-align:center; }
 </style>
 </head>
 <body>
 
 <section class="page front">
-  <div class="front-photo"></div>
-  <div class="front-brand">
-    <span class="brand-mark"><img src="../images/icon-mark-white.svg" alt=""></span>
-    <span class="brand-name">LagOHM<span>.</span></span>
+  <div class="watermark wm-massage"></div>
+  <div class="photo-card">
+    <span class="badge logo"><img src="../images/icon-mark-white.svg" alt="LagOHM"></span>
   </div>
-  <div class="front-body">
-    <div class="what">Yoga &amp; Massage<span>München-Harlaching</span></div>
+  <div class="front-text">
     <h1>Ankommen. Loslassen.<br><em>Bei dir sein.</em></h1>
+    <div class="offers-mini">
+      <span><i class="badge"><img src="../images/icon-massage-white.svg" alt=""></i>Massage</span>
+      <span><i class="badge"><img src="../images/icon-yoga-white.svg" alt=""></i>Yoga</span>
+    </div>
     <p class="lede">Individuelle 1:1 Yoga-Sessions und achtsame Körperarbeit in ruhigem, privatem Raum – für Entspannung, Regeneration und innere Ruhe.</p>
     <div class="front-foot">
-      <span>Termin online buchen</span>
+      <span>München-Harlaching</span>
       <strong>lagohm.de</strong>
     </div>
   </div>
 </section>
 
 <section class="page back">
-  <h2>Zwei Wege, <em>bei dir anzukommen.</em></h2>
+  <div class="watermark wm-yoga"></div>
+  <div class="watermark wm-mark"></div>
 
-  <div class="offer">
-    <div class="offer-photo" style="background-image:url(img-back-massage.jpg)"></div>
-    <div class="offer-text">
-      <div class="offer-head">90 Min · 120 €</div>
-      <div class="offer-title">Massage</div>
-      <div class="offer-meta">Thai Yoga-Massage · Shiatsu · achtsame Körperarbeit</div>
+  <div class="back-head">
+    <span class="badge"><img src="../images/icon-mark-white.svg" alt="LagOHM"></span>
+    <h2>Zwei Wege,<br><em>bei dir anzukommen.</em></h2>
+  </div>
+
+  <div class="card">
+    <div class="card-photo" style="background-image:url(img-back-massage.jpg)"></div>
+    <div class="card-text">
+      <div class="card-top"><span class="badge"><img src="../images/icon-massage-white.svg" alt=""></span><span class="card-title">Massage</span></div>
+      <div class="card-price">90 Min · 120 €</div>
+      <div class="card-meta">Thai Yoga-Massage · Shiatsu · achtsame Körperarbeit</div>
       <p>Du bleibst <b>bekleidet</b> und liegst auf einer weichen Matte: sanfte Dehnungen, fließende Bewegungen und gezielter Druck – intuitiv auf deinen Körper abgestimmt.</p>
     </div>
   </div>
 
-  <div class="offer">
-    <div class="offer-photo" style="background-image:url(img-back-yoga.jpg)"></div>
-    <div class="offer-text">
-      <div class="offer-head">75 Min · 75 €</div>
-      <div class="offer-title">Private Yoga Session</div>
-      <div class="offer-meta">Yin Yoga · Yoga-Therapie · Einzelunterricht</div>
+  <div class="card">
+    <div class="card-photo" style="background-image:url(img-back-yoga.jpg)"></div>
+    <div class="card-text">
+      <div class="card-top"><span class="badge"><img src="../images/icon-yoga-white.svg" alt=""></span><span class="card-title">Private Yoga Session</span></div>
+      <div class="card-price">75 Min · 75 €</div>
+      <div class="card-meta">Yin Yoga · Yoga-Therapie · Einzelunterricht</div>
       <p><b>Yoga, das sich deinem Körper anpasst</b> – nicht umgekehrt. Ohne Leistungsdruck, mit Raum für das, was du gerade brauchst.</p>
     </div>
   </div>
