@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>LagOHM brand assets</title>
+<!-- Source for the PNG brand assets in images/brand/ (Instagram profile picture, email signature).
+     Rendered with headless Edge: print/brand/build-brand.ps1. ?v=insta | sig | sig-text -->
+<style>
+  @font-face{ font-family:'Fraunces'; font-weight:400 600; src:url(../../fonts/fraunces-normal-latin.woff2) format('woff2'); }
+  html, body{ margin:0; padding:0; background: transparent; }
+  .grad{ background: linear-gradient(135deg, #C6432B, #EFA05E); }
+  /* Instagram: 1080 × 1080, gradient fills everything, mark centred (safe inside the circle crop) */
+  .insta{ width:1080px; height:1080px; display:flex; align-items:center; justify-content:center; }
+  .insta img{ width:560px; }
+  /* Signature: rounded square only */
+  .sig{ width:240px; height:240px; border-radius:60px; display:flex; align-items:center; justify-content:center; }
+  .sig img{ width:136px; }
+  /* Signature with lettering */
+  .sig-text{ display:inline-flex; align-items:center; gap:36px; padding: 4px 8px 4px 4px; }
+  .sig-text .sig{ width:200px; height:200px; border-radius:50px; }
+  .sig-text .sig img{ width:114px; }
+  .word{ font-family:'Fraunces', Georgia, serif; font-weight:600; font-size:150px; color:#2B1B16; line-height:1; letter-spacing:-1px; }
+  .word span{ color:#C6432B; }
+  [hidden]{ display:none !important; }
+</style>
+</head>
+<body>
+<div class="insta grad" id="insta" hidden><img src="../../images/icon-mark-white.svg" alt=""></div>
+<div class="sig grad" id="sig" hidden><img src="../../images/icon-mark-white.svg" alt=""></div>
+<div class="sig-text" id="sig-text" hidden><div class="sig grad"><img src="../../images/icon-mark-white.svg" alt=""></div><div class="word">LagOHM<span>.</span></div></div>
+<script>document.getElementById(new URLSearchParams(location.search).get('v') || 'insta').hidden = false;</script>
+</body>
+</html>
