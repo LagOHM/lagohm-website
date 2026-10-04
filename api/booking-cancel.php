@@ -82,7 +82,7 @@ header('Content-Type: text/html; charset=utf-8');
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= htmlspecialchars($t['title'], ENT_QUOTES, 'UTF-8') ?> – LagOHM</title>
-<link rel="stylesheet" href="../css/style.css?v=20261004-2">
+<link rel="stylesheet" href="../css/style.css?v=20261004-3">
 </head>
 <body>
 <main class="legal-page">

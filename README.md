@@ -37,8 +37,8 @@ Bis zum Umzug auf Netcup lief die Seite auf Netlify mit GitHub-Auto-Deploy. Dies
 
 ## Cache-Busting für CSS/JS
 
-Zusätzlich setzt `.htaccess` im Hauptordner `Cache-Control: no-cache` für HTML/CSS/JS. Alle Verweise auf eigene CSS- und JS-Dateien haben einen Versions-Anhang (`style.css?v=20261004-2`). Ohne beides behalten Browser (vor allem am Handy) alte Dateien oft tagelang. **Nach jeder Änderung an einer CSS- oder JS-Datei die Version überall hochsetzen**, z. B.:
+Zusätzlich setzt `.htaccess` im Hauptordner `Cache-Control: no-cache` für HTML/CSS/JS. Alle Verweise auf eigene CSS- und JS-Dateien haben einen Versions-Anhang (`style.css?v=20261004-3`). Ohne beides behalten Browser (vor allem am Handy) alte Dateien oft tagelang. **Nach jeder Änderung an einer CSS- oder JS-Datei die Version überall hochsetzen**, z. B.:
 
 ```bash
-grep -rl --include=*.html --include=*.php '?v=20261004-2' . | xargs sed -i 's/?v=20261004-2/?v=NEUES_DATUM/g'
+grep -rl --include=*.html --include=*.php '?v=20261004-3' . | xargs sed -i 's/?v=20261004-3/?v=NEUES_DATUM/g'
 ```
