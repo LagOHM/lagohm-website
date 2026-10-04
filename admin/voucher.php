@@ -119,8 +119,8 @@ header('Content-Type: text/html; charset=utf-8');
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gutschein <?= e($code) ?> – Admin – LagOHM</title>
-<link rel="stylesheet" href="../css/style.css?v=20261004">
-<link rel="stylesheet" href="admin.css?v=20261004">
+<link rel="stylesheet" href="../css/style.css?v=20261004-2">
+<link rel="stylesheet" href="admin.css?v=20261004-2">
 <style>
   .voucher-form{ display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px 20px; max-width: 760px; }
   .voucher-form .wide{ grid-column: 1 / -1; }
