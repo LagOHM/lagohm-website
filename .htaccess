@@ -1,3 +1,16 @@
+# Always serve https://lagohm.de. Over plain http the browser drops the secure session cookie,
+# so admin logins and bookings fail with "Sitzung abgelaufen". www is folded into the bare domain.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} off [OR]
+  RewriteCond %{HTTP_HOST} ^www\. [NC]
+  RewriteRule ^ https://lagohm.de%{REQUEST_URI} [R=301,L]
+</IfModule>
+# Browsers that have seen https once go straight there next time (1 year).
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000" env=HTTPS
+</IfModule>
+
 # Without explicit cache headers, browsers (Safari on iPhone in particular) keep showing
 # stale pages after a deploy. Pages, styles and scripts: always revalidate (cheap 304 via ETag).
 # Fonts never change: cache for a year.
