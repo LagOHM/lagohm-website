@@ -15,6 +15,7 @@
   const errorEl = document.getElementById('booking-error');
   const successEl = document.getElementById('booking-success');
   const backBtn = document.getElementById('booking-back');
+  const servicesEl = document.getElementById('booking-services');
 
   const csrfTokenField = document.getElementById('booking-csrf-token');
   const renderedAtField = document.getElementById('booking-rendered-at');
@@ -32,7 +33,10 @@
       at: (date, time) => `${date} um ${time} Uhr`,
       locale: 'de-DE',
       dateFormat: { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' },
-      success: (service, when) => `<h3>Dein Termin ist bestätigt!</h3><p>${service} am ${when}.<br>Eine Bestätigung ist unterwegs an deine E-Mail-Adresse.</p>`,
+      sending: 'Wird gebucht …',
+      thanks: (name) => (name ? `Danke, ${name} – dein Termin ist gebucht!` : 'Dein Termin ist gebucht!'),
+      mailNote: (email) => `Eine Bestätigung mit allen Details ist unterwegs an <strong>${email}</strong>. Falls sie nicht ankommt, schau bitte auch im Spam-Ordner nach.`,
+      again: 'Weiteren Termin buchen',
       taken: 'Dieser Termin ist leider gerade nicht mehr frei. Bitte eine andere Zeit wählen.',
       failed: 'Die Buchung konnte nicht abgeschickt werden. Bitte versuch es nochmal.',
     },
@@ -44,13 +48,44 @@
       at: (date, time) => `${date} at ${time}`,
       locale: 'en-GB',
       dateFormat: { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' },
-      success: (service, when) => `<h3>Your appointment is confirmed!</h3><p>${service} on ${when}.<br>A confirmation is on its way to your email address.</p>`,
+      sending: 'Booking …',
+      thanks: (name) => (name ? `Thank you, ${name} – your appointment is booked!` : 'Your appointment is booked!'),
+      mailNote: (email) => `A confirmation with all the details is on its way to <strong>${email}</strong>. If it doesn't arrive, please check your spam folder too.`,
+      again: 'Book another appointment',
       taken: 'Sorry, this time has just been taken. Please choose another one.',
       failed: 'The booking could not be sent. Please try again.',
     },
   }[lang];
 
   let selected = { service: null, serviceName: null, duration: null, price: null };
+
+  function escapeHtml(text) {
+    return String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // Clear, unmistakable confirmation: the whole widget turns into a success card.
+  function showSuccess(data, firstName, email) {
+    servicesEl.hidden = true;
+    dateStep.hidden = true;
+    form.hidden = true;
+    successEl.innerHTML = '<div class="booking-success-icon" aria-hidden="true">'
+      + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>'
+      + `<h3>${escapeHtml(T.thanks(firstName))}</h3>`
+      + `<div class="booking-success-details"><strong>${escapeHtml(data.service)}</strong><br>${escapeHtml(data.date_label)}</div>`
+      + `<p>${T.mailNote(escapeHtml(email))}</p>`
+      + `<button type="button" class="btn btn-ghost btn-small" id="booking-again">${T.again}</button>`;
+    successEl.hidden = false;
+    successEl.focus({ preventScroll: true });
+    successEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('booking-again').addEventListener('click', () => {
+      successEl.hidden = true;
+      servicesEl.hidden = false;
+      serviceCards.forEach((c) => c.classList.remove('is-selected'));
+      selected = { service: null, serviceName: null, duration: null, price: null };
+      fetchCsrf();
+      servicesEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
 
   function toYmd(date) {
     return date.toISOString().slice(0, 10);
@@ -147,7 +182,10 @@
     errorEl.hidden = true;
 
     const submitBtn = form.querySelector('button[type="submit"]');
+    const submitLabel = submitBtn.innerHTML;
     submitBtn.disabled = true;
+    submitBtn.classList.add('is-loading');
+    submitBtn.innerHTML = `<span class="btn-spinner" aria-hidden="true"></span>${T.sending}`;
 
     const payload = {
       csrf_token: csrfTokenField.value,
@@ -177,10 +215,9 @@
         return data;
       })
       .then((data) => {
+        const firstName = payload.name.trim().split(/\s+/)[0] || '';
         form.reset();
-        form.hidden = true;
-        successEl.hidden = false;
-        successEl.innerHTML = T.success(data.service, data.date_label);
+        showSuccess(data, firstName, payload.email.trim());
       })
       .catch((err) => {
         if (err && err.status === 409) {
@@ -195,6 +232,8 @@
       })
       .finally(() => {
         submitBtn.disabled = false;
+        submitBtn.classList.remove('is-loading');
+        submitBtn.innerHTML = submitLabel;
       });
   }
 
