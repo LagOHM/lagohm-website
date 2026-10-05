@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   language CHAR(2) NOT NULL DEFAULT 'de',
   start_datetime DATETIME NOT NULL, -- stored in UTC
   end_datetime DATETIME NOT NULL,   -- stored in UTC
-  status ENUM('confirmed','cancelled') NOT NULL DEFAULT 'confirmed',
+  status ENUM('confirmed','cancelled','completed') NOT NULL DEFAULT 'confirmed', -- completed = marked done in admin
   google_event_id VARCHAR(255) NULL,
   reminder_sent_at DATETIME NULL,
   cancellation_token CHAR(64) NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS app_settings (
 CREATE TABLE IF NOT EXISTS booking_audit_log (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   booking_id INT UNSIGNED NULL,
-  action VARCHAR(40) NOT NULL, -- created|cancelled|calendar_sync_failed|reminder_sent
+  action VARCHAR(40) NOT NULL, -- created|cancelled|completed|reopened|calendar_sync_failed|reminder_sent
   detail VARCHAR(500) NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
