@@ -44,3 +44,10 @@ table input[type="time"]{ padding:6px 8px; border:1px solid var(--line); border-
   width:100%; margin-top:6px; margin-bottom:16px; padding:10px 12px; border:1px solid var(--line);
   border-radius:10px; font-size:1rem; font-family: var(--sans); background: var(--bg-card);
 }
+.admin-table tr.is-completed{ color: var(--ink-soft); }
+.admin-actions form + form{ margin-top: 6px; }
+
+.admin-filter{ display:flex; flex-wrap:wrap; gap:8px; margin: 8px 0 4px; }
+.admin-filter a{ padding: 6px 14px; border:1px solid var(--line); border-radius: 999px; color: var(--ink-soft); font-size:.9rem; }
+.admin-filter a span{ font-size:.8rem; opacity:.75; margin-left:2px; }
+.admin-filter a.active{ background: var(--accent-1); border-color: var(--accent-1); color:#fff; }

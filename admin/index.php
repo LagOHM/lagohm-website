@@ -33,11 +33,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_booking_id']))
     }
 }
 
-$stmt = $pdo->query('SELECT b.*, s.name AS service_name FROM bookings b
-                      JOIN services s ON s.id = b.service_id
-                      ORDER BY b.start_datetime DESC
-                      LIMIT 200');
+// Mark an appointment that has taken place as done, or undo that.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['complete_booking_id']) || isset($_POST['reopen_booking_id']))) {
+    if (!Csrf::verify($_POST['csrf_token'] ?? null)) {
+        $message = 'Sitzung abgelaufen, bitte Seite neu laden.';
+    } else {
+        $complete = isset($_POST['complete_booking_id']);
+        $id = (int)($complete ? $_POST['complete_booking_id'] : $_POST['reopen_booking_id']);
+        $upd = $complete
+            ? $pdo->prepare('UPDATE bookings SET status = "completed" WHERE id = ? AND status = "confirmed" AND start_datetime <= UTC_TIMESTAMP()')
+            : $pdo->prepare('UPDATE bookings SET status = "confirmed" WHERE id = ? AND status = "completed"');
+        $upd->execute([$id]);
+        if ($upd->rowCount() > 0) {
+            $log = $pdo->prepare('INSERT INTO booking_audit_log (booking_id, action, detail) VALUES (?, ?, "via admin dashboard")');
+            $log->execute([$id, $complete ? 'completed' : 'reopened']);
+            $message = $complete ? "Termin #{$id} als erledigt markiert." : "Termin #{$id} wieder als offen markiert.";
+        }
+    }
+}
+
+// Filter tabs: "Offen" (confirmed, upcoming or not yet marked done) is the default view.
+$filters = [
+    'open' => ['Offen', 'confirmed'],
+    'done' => ['Erledigt', 'completed'],
+    'cancelled' => ['Storniert', 'cancelled'],
+    'all' => ['Alle', null],
+];
+$show = is_string($_GET['show'] ?? null) && isset($filters[$_GET['show']]) ? $_GET['show'] : 'open';
+$counts = $pdo->query('SELECT status, COUNT(*) AS n FROM bookings GROUP BY status')->fetchAll(PDO::FETCH_KEY_PAIR);
+$counts['all'] = array_sum($counts);
+
+$filterStatus = $filters[$show][1];
+$stmt = $pdo->prepare('SELECT b.*, s.name AS service_name FROM bookings b
+                        JOIN services s ON s.id = b.service_id'
+                        . ($filterStatus ? ' WHERE b.status = ?' : '') . '
+                        ORDER BY b.start_datetime DESC
+                        LIMIT 200');
+$stmt->execute($filterStatus ? [$filterStatus] : []);
 $bookings = $stmt->fetchAll();
+$nowUtc = new DateTime('now', new DateTimeZone('UTC'));
+$statusLabels = ['confirmed' => 'bestätigt', 'completed' => 'erledigt', 'cancelled' => 'storniert'];
 
 header('Content-Type: text/html; charset=utf-8');
 ?>
@@ -47,8 +82,8 @@ header('Content-Type: text/html; charset=utf-8');
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Buchungen – Admin – LagOHM</title>
-<link rel="stylesheet" href="../css/style.css?v=20261005">
-<link rel="stylesheet" href="admin.css?v=20261005">
+<link rel="stylesheet" href="../css/style.css?v=20261005-2">
+<link rel="stylesheet" href="admin.css?v=20261005-2">
 </head>
 <body>
 <header class="admin-header">
@@ -69,6 +104,12 @@ header('Content-Type: text/html; charset=utf-8');
   <p class="admin-note">Hinweis: Stornierungen bitte immer hier vornehmen, nicht direkt im Google Kalender löschen — sonst bleibt der Slot in der Datenbank fälschlich belegt.</p>
   <?php if ($message): ?><p class="admin-success"><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p><?php endif; ?>
 
+  <nav class="admin-filter">
+    <?php foreach ($filters as $key => [$label, $status]): ?>
+      <a href="?show=<?= $key ?>" class="<?= $key === $show ? 'active' : '' ?>"><?= $label ?> <span><?= (int)($counts[$status ?? 'all'] ?? 0) ?></span></a>
+    <?php endforeach; ?>
+  </nav>
+
   <table class="admin-table">
     <thead>
       <tr>
@@ -79,9 +120,10 @@ header('Content-Type: text/html; charset=utf-8');
       <?php foreach ($bookings as $b): ?>
         <?php
           $start = new DateTime($b['start_datetime'], new DateTimeZone('UTC'));
+          $hasStarted = $start <= $nowUtc;
           $start->setTimezone($tz);
         ?>
-        <tr class="<?= $b['status'] === 'cancelled' ? 'is-cancelled' : '' ?>">
+        <tr class="<?= ['cancelled' => 'is-cancelled', 'completed' => 'is-completed'][$b['status']] ?? '' ?>">
           <td>#<?= (int)$b['id'] ?></td>
           <td><?= $start->format('d.m.Y H:i') ?></td>
           <td><?= htmlspecialchars($b['service_name'], ENT_QUOTES, 'UTF-8') ?></td>
@@ -95,10 +137,23 @@ header('Content-Type: text/html; charset=utf-8');
           </td>
           <td><?= htmlspecialchars((string)$b['customer_note'], ENT_QUOTES, 'UTF-8') ?></td>
           <td>
-            <?= htmlspecialchars($b['status'], ENT_QUOTES, 'UTF-8') ?>
+            <?= htmlspecialchars($statusLabels[$b['status']] ?? $b['status'], ENT_QUOTES, 'UTF-8') ?>
             <?php if ($b['reminder_sent_at'] && $b['status'] === 'confirmed'): ?><br><small>Erinnerung gesendet</small><?php endif; ?>
           </td>
-          <td>
+          <td class="admin-actions">
+            <?php if ($b['status'] === 'confirmed' && $hasStarted): ?>
+              <form method="post">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Csrf::token(), ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="complete_booking_id" value="<?= (int)$b['id'] ?>">
+                <button type="submit" class="btn btn-primary btn-small">Erledigt</button>
+              </form>
+            <?php elseif ($b['status'] === 'completed'): ?>
+              <form method="post">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Csrf::token(), ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="reopen_booking_id" value="<?= (int)$b['id'] ?>">
+                <button type="submit" class="btn btn-ghost btn-small">Rückgängig</button>
+              </form>
+            <?php endif; ?>
             <?php if ($b['status'] === 'confirmed'): ?>
               <form method="post" onsubmit="return confirm('Diesen Termin wirklich stornieren?');">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Csrf::token(), ENT_QUOTES, 'UTF-8') ?>">
@@ -110,7 +165,7 @@ header('Content-Type: text/html; charset=utf-8');
         </tr>
       <?php endforeach; ?>
       <?php if (!$bookings): ?>
-        <tr><td colspan="8">Noch keine Buchungen.</td></tr>
+        <tr><td colspan="8">Keine Buchungen in dieser Ansicht.</td></tr>
       <?php endif; ?>
     </tbody>
   </table>
@@ -124,7 +179,7 @@ header('Content-Type: text/html; charset=utf-8');
   var loadedAt = Date.now();
   function refreshIfDue() {
     if (document.visibilityState === 'visible' && Date.now() - loadedAt >= INTERVAL) {
-      window.location.replace('index.php');
+      window.location.replace('index.php' + window.location.search);
     }
   }
   setInterval(refreshIfDue, 5000);

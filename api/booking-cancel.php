@@ -30,6 +30,7 @@ $t = [
     'de' => [
         'title' => 'Termin stornieren',
         'already' => 'Dieser Termin wurde bereits storniert.',
+        'past' => 'Dieser Termin hat bereits stattgefunden.',
         'done' => 'Dein Termin wurde storniert.',
         'emailed' => ' Eine Bestätigung ist unterwegs an deine E-Mail-Adresse.',
         'button' => 'Ja, Termin stornieren',
@@ -39,6 +40,7 @@ $t = [
     'en' => [
         'title' => 'Cancel appointment',
         'already' => 'This appointment has already been cancelled.',
+        'past' => 'This appointment has already taken place.',
         'done' => 'Your appointment has been cancelled.',
         'emailed' => ' A confirmation is on its way to your email address.',
         'button' => 'Yes, cancel appointment',
@@ -57,8 +59,8 @@ $dateLabel = $lang === 'en'
 $message = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($booking['status'] === 'cancelled') {
-        $message = $t['already'];
+    if ($booking['status'] !== 'confirmed') {
+        $message = $t[$booking['status'] === 'completed' ? 'past' : 'already'];
     } else {
         // "AND status" so a double tap on the button never sends the emails twice.
         $upd = $pdo->prepare('UPDATE bookings SET status = "cancelled" WHERE id = ? AND status = "confirmed"');
@@ -82,7 +84,7 @@ header('Content-Type: text/html; charset=utf-8');
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= htmlspecialchars($t['title'], ENT_QUOTES, 'UTF-8') ?> – LagOHM</title>
-<link rel="stylesheet" href="../css/style.css?v=20261005">
+<link rel="stylesheet" href="../css/style.css?v=20261005-2">
 </head>
 <body>
 <main class="legal-page">
@@ -91,8 +93,8 @@ header('Content-Type: text/html; charset=utf-8');
     <?php if ($message): ?>
       <p><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
       <p><a class="back" href="<?= $t['homeUrl'] ?>"><?= htmlspecialchars($t['home'], ENT_QUOTES, 'UTF-8') ?></a></p>
-    <?php elseif ($booking['status'] === 'cancelled'): ?>
-      <p><?= htmlspecialchars($t['already'], ENT_QUOTES, 'UTF-8') ?></p>
+    <?php elseif ($booking['status'] !== 'confirmed'): ?>
+      <p><?= htmlspecialchars($t[$booking['status'] === 'completed' ? 'past' : 'already'], ENT_QUOTES, 'UTF-8') ?></p>
       <p><a class="back" href="<?= $t['homeUrl'] ?>"><?= htmlspecialchars($t['home'], ENT_QUOTES, 'UTF-8') ?></a></p>
     <?php else: ?>
       <p><strong><?= htmlspecialchars($booking['service_name'], ENT_QUOTES, 'UTF-8') ?></strong><br>

@@ -66,6 +66,11 @@ function lagohm_migrate(PDO $pdo): void
         if (!$pdo->query("SHOW COLUMNS FROM bookings LIKE 'language'")->fetch()) {
             $pdo->exec("ALTER TABLE bookings ADD COLUMN language CHAR(2) NOT NULL DEFAULT 'de' AFTER customer_note");
         }
+        // Admin can mark past appointments as done ("Erledigt").
+        $statusCol = $pdo->query("SHOW COLUMNS FROM bookings LIKE 'status'")->fetch();
+        if ($statusCol && strpos($statusCol['Type'], 'completed') === false) {
+            $pdo->exec("ALTER TABLE bookings MODIFY status ENUM('confirmed','cancelled','completed') NOT NULL DEFAULT 'confirmed'");
+        }
         if (!$pdo->query("SHOW TABLES LIKE 'vouchers'")->fetch()) {
             $pdo->exec(LAGOHM_SQL_VOUCHERS);
             $pdo->exec(LAGOHM_SQL_VOUCHER_REDEMPTIONS);
