@@ -8,7 +8,7 @@
 
 :root{
   --bg: #FBF4EF;
-  --bg-card: #F6E9E0;
+  --bg-card: #FBE5D3; /* soft apricot: cards, panels, footer */
   --ink: #2B1B16;
   --ink-soft: #7C6459;
   --line: #E9D9CC;
