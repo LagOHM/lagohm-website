@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>LagOHM Visitenkarte</title>
+<!--
+  Print template: business card 85 × 55 mm plus 2 mm bleed on every side = 89 × 59 mm per page
+  (front / back). Keep text at least 3 mm inside the trim. Same design language as the flyer
+  and website: brand gradient, soft apricot ground, logo mark, faint icon watermark.
+  Rendered to PDF with: powershell -File print/build-flyer.ps1 -Name visitenkarte
+-->
+<style>
+  @font-face{ font-family:'Fraunces'; font-style:normal; font-weight:400 600; src:url(../fonts/fraunces-normal-latin.woff2) format('woff2'); }
+  @font-face{ font-family:'Fraunces'; font-style:italic; font-weight:500; src:url(../fonts/fraunces-italic-latin.woff2) format('woff2'); }
+  @font-face{ font-family:'Manrope'; font-style:normal; font-weight:400 700; src:url(../fonts/manrope-normal-latin.woff2) format('woff2'); }
+
+  :root{
+    --apricot:#FBE5D3; --ink:#2B1B16; --ink-soft:#6F5447;
+    --accent-1:#C6432B; --accent-2:#EFA05E;
+    --grad: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    --serif:"Fraunces", Georgia, serif; --sans:"Manrope", Arial, sans-serif;
+  }
+  @page{ size: 89mm 59mm; margin: 0; }
+  *{ box-sizing: border-box; }
+  html, body{ margin:0; padding:0; background:#ddd; }
+  body{ font-family: var(--sans); color: var(--ink); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .card{
+    width:89mm; height:59mm; overflow:hidden; position:relative;
+    margin: 0 auto 8mm; page-break-after: always; break-after: page;
+  }
+  .card:last-child{ page-break-after: auto; break-after: auto; margin-bottom:0; }
+  @media screen{ body{ padding: 10mm 0; } .card{ box-shadow: 0 8px 30px rgba(0,0,0,.18); } }
+  @media print{ html, body{ background:none; } }
+
+  .watermark{ position:absolute; pointer-events:none; -webkit-mask: var(--icon) center / contain no-repeat; mask: var(--icon) center / contain no-repeat; }
+
+  /* ---------- Front: brand gradient with the logo ---------- */
+  .front{ background: linear-gradient(135deg, #A1331F, var(--accent-1) 45%, var(--accent-2)); color:#fff; display:flex; align-items:center; justify-content:center; }
+  .front .watermark{ --icon: url(../images/icon-massage-white.svg); background:#fff; opacity:.08; width:46mm; height:46mm; right:-12mm; bottom:-14mm; }
+  .logo{ position:relative; display:flex; flex-direction:column; align-items:center; gap:2.6mm; }
+  .logo img{ width:19mm; display:block; }
+  .wordmark{ font-family: var(--serif); font-weight:600; font-size:8.2mm; line-height:1; letter-spacing:-.01em; }
+  .tagline{ font-size:2.45mm; letter-spacing:.2em; text-transform:uppercase; font-weight:600; opacity:.92; }
+
+  /* ---------- Back: contact details ---------- */
+  .back{ background: var(--apricot); padding: 6.5mm 6.5mm 6mm 7mm; display:flex; gap:4mm; }
+  .back .watermark{ --icon: url(../images/icon-yoga-white.svg); background: var(--accent-1); opacity:.07; width:30mm; height:30mm; right:-6mm; top:-9mm; }
+  .info{ position:relative; flex:1; display:flex; flex-direction:column; }
+  .name{ font-family: var(--serif); font-weight:600; font-size:4.6mm; line-height:1.1; }
+  .role{ margin-top:.8mm; font-size:2.45mm; color: var(--accent-1); font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+  .contact{ list-style:none; margin: auto 0 0; padding:0; display:flex; flex-direction:column; gap:1.5mm; font-size:2.75mm; }
+  .contact li{ display:flex; align-items:center; gap:1.8mm; }
+  .contact svg{ width:3mm; height:3mm; flex:none; color: var(--accent-1); }
+  .contact strong{ font-weight:700; }
+  .qr{ position:relative; flex:none; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:1.2mm; }
+  .qr img{ width:17mm; height:17mm; background:#fff; padding:.8mm; border-radius:1.6mm; display:block; }
+  .qr span{ font-size:2.2mm; font-weight:700; color: var(--ink-soft); letter-spacing:.04em; }
+</style>
+</head>
+<body>
+
+<section class="card front">
+  <div class="watermark"></div>
+  <div class="logo">
+    <img src="../images/icon-mark-white.svg" alt="LagOHM">
+    <div class="wordmark">LagOHM.</div>
+    <div class="tagline">Yoga &amp; Massage</div>
+  </div>
+</section>
+
+<section class="card back">
+  <div class="watermark"></div>
+  <div class="info">
+    <div class="name">Helena Gillerblad</div>
+    <div class="role">Yoga &amp; Massage</div>
+    <ul class="contact">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg><strong>lagohm.de</strong></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/></svg>helena@lagohm.de</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg>München-Harlaching</li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1"/></svg>@lagohm_yoga_massage</li>
+    </ul>
+  </div>
+  <div class="qr">
+    <img src="qr-buchen.svg" alt="QR-Code zur Online-Buchung">
+    <span>Termin buchen</span>
+  </div>
+</section>
+
+</body>
+</html>
