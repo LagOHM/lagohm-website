@@ -206,6 +206,7 @@ if ($lang === 'en') {
         . "Payment: cash or bank transfer, on site or after the appointment.\n\n"
         . "The attached file adds the appointment to your calendar.\n\n"
         . "If you need to cancel, please use this link:\n{$cancelUrl}\n\n"
+        . "I'm looking forward to seeing you!\n\n"
         . "See you soon,\nHelena · LagOHM";
     $icsTitle = $service['name'] . ' at LagOHM';
     $icsCancel = "Cancel: {$cancelUrl}";
@@ -222,6 +223,7 @@ if ($lang === 'en') {
         . "Zahlung: bar oder per Überweisung, vor Ort oder im Anschluss an den Termin.\n\n"
         . "Im Anhang findest du den Termin zum Eintragen in deinen Kalender.\n\n"
         . "Falls du den Termin absagen musst, nutze bitte diesen Link:\n{$cancelUrl}\n\n"
+        . "Ich freue mich auf Dich!\n\n"
         . "Bis bald,\nHelena · LagOHM";
     $icsTitle = $service['name'] . ' bei LagOHM';
     $icsCancel = "Absagen: {$cancelUrl}";
