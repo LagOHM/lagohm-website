@@ -187,9 +187,11 @@ a{ color: inherit; text-decoration: none; }
 
 /* Large, faint logo-part watermarks (as on the flyer). The white SVG icons are tinted via CSS mask.
    overflow: clip (not hidden) so the sticky price panels keep working. */
-#massage, #yoga, .gift-section{ position: relative; overflow: clip; }
-#massage > .wrap, #yoga > .wrap, .gift-section > .wrap{ position: relative; z-index: 1; }
-#massage::before, #yoga::before, .gift-section::before{
+#massage, #yoga, .gift-section, .principles, .about, .faq{ position: relative; overflow: clip; }
+#massage > .wrap, #yoga > .wrap, .gift-section > .wrap,
+.principles > .wrap, .about > .wrap, .faq > .wrap{ position: relative; z-index: 1; }
+#massage::before, #yoga::before, .gift-section::before,
+.principles::before, .about::before, .faq::before{
   content:""; position:absolute; z-index:0; pointer-events:none;
   background: var(--accent-1); opacity:.045;
   -webkit-mask: var(--wm) center / contain no-repeat; mask: var(--wm) center / contain no-repeat;
@@ -197,6 +199,16 @@ a{ color: inherit; text-decoration: none; }
 #massage::before{ --wm: url(../images/icon-massage-white.svg); width:340px; height:340px; left:-15px; bottom:50px; }
 #yoga::before{ --wm: url(../images/icon-yoga-white.svg); width:360px; height:360px; right:90px; bottom:30px; }
 .gift-section::before{ --wm: url(../images/icon-mark-white.svg); width:260px; height:225px; right:6%; top:300px; }
+/* The full logo mark, alternating sides down the page */
+.principles::before, .about::before, .faq::before{ --wm: url(../images/icon-mark-white.svg); }
+.principles::before{ width:240px; height:208px; left:3%; bottom:20px; }
+.about::before{ width:300px; height:260px; right:4%; bottom:40px; }
+.faq::before{ width:300px; height:260px; left:4%; top:38%; }
+@media (max-width: 760px){
+  .principles::before{ width:160px; height:139px; left:-40px; bottom:10px; }
+  .about::before{ width:190px; height:165px; right:-40px; bottom:30px; }
+  .faq::before{ width:190px; height:165px; left:-50px; top:30%; }
+}
 @media (max-width: 760px){
   #massage::before{ width:220px; height:220px; left:-60px; bottom:40px; }
   #yoga::before{ width:230px; height:230px; right:20px; bottom:20px; }
