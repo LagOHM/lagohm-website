@@ -105,8 +105,8 @@ header('Content-Type: text/html; charset=utf-8');
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gutscheine – Admin – LagOHM</title>
-<link rel="stylesheet" href="../css/style.css?v=20261005-3">
-<link rel="stylesheet" href="admin.css?v=20261005-3">
+<link rel="stylesheet" href="../css/style.css?v=20261006">
+<link rel="stylesheet" href="admin.css?v=20261006">
 <style>
   .voucher-toolbar{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin: 8px 0 8px; }
   .voucher-toolbar input[type="search"]{ padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:1rem; min-width: 220px; }
