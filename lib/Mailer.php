@@ -75,7 +75,7 @@ final class Mailer
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FBF4EF;padding:32px 0;">
     <tr>
       <td align="center">
-        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background:#F6E9E0;border-radius:22px;padding:32px;font-family:Arial,Helvetica,sans-serif;color:#2B1B16;">
+        <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background:#FBE5D3;border-radius:22px;padding:32px;font-family:Arial,Helvetica,sans-serif;color:#2B1B16;">
           <tr>
             <td align="center" style="padding-bottom:20px;">
               {$logoHtml}
