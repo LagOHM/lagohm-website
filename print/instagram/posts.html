@@ -126,6 +126,21 @@
   .rows div:last-child{ border-bottom:0; }
   .rows strong{ font-family:var(--serif); font-weight:600; font-size:42px; }
 
+  /* story format (1080 × 1920): photo in the upper part, gradient field below with headline, brand and room for the mention sticker.
+     Instagram's own UI covers roughly the top 250 px and the bottom 250 px. */
+  .slide.story{ height:1920px; background:var(--grad); color:#fff; }
+  .story .photo{ position:absolute; left:0; top:0; width:100%; height:1040px; object-fit:cover; }
+  .story-text{ position:absolute; left:100px; right:100px; top:1100px; display:flex; flex-direction:column; gap:22px; }
+  .story-text .eyebrow{ color:rgba(255,255,255,.88); }
+  .story-text h1{ font-size:92px; }
+  .story-text h1 em{ color:#fff; }
+  .story-brand{ display:flex; align-items:center; gap:22px; margin-top:18px; }
+  .story-brand img{ width:96px; }
+  .story-brand div{ display:flex; flex-direction:column; gap:4px; }
+  .story-brand b{ font-family:var(--serif); font-weight:600; font-size:52px; letter-spacing:-1px; line-height:1; }
+  .story-brand span{ font-size:30px; }
+  .story-text .follow{ font-weight:700; font-size:32px; letter-spacing:1px; margin-top:6px; }
+
   [hidden]{ display:none !important; }
 </style>
 </head>
@@ -412,9 +427,40 @@
   <div class="pill">Link in der Bio</div>
 </section>
 
+<!-- ============ Private account: invitation post (2 slides, English) ============ -->
+<section class="slide photo-full" id="privatpost-1" data-foot="Swipe →">
+  <img class="photo" src="../../images/helena-yoga.jpeg" alt="" style="object-position:50% 30%">
+  <div class="text">
+    <div class="eyebrow">A new chapter</div>
+    <h1>Do you know what I’m up to <em>these days?</em></h1>
+  </div>
+</section>
+
+<section class="slide grad cover" id="privatpost-2" data-foot="lagohm.de">
+  <img class="mark" src="../../images/icon-mark-white.svg" alt="" style="width:340px">
+  <h2>Yoga &amp; massage,<br><em>just right.</em></h2>
+  <p>My own small practice in Munich-Harlaching.<br>Not too much, not too little.</p>
+  <div class="pill">Follow @lagohm_yoga_massage</div>
+</section>
+
+<!-- ============ Private account: invitation story (1080 × 1920, English) ============
+     The empty space below "Follow me here" is for the @lagohm_yoga_massage mention sticker, added in the Instagram app. -->
+<section class="slide story" id="privatstory-1">
+  <img class="photo" src="../../images/helena-yoga.jpeg" alt="" style="object-position:50% 22%">
+  <div class="story-text">
+    <div class="eyebrow">Guess what?</div>
+    <h1>Do you know what I’m up to <em>these days?</em></h1>
+    <div class="story-brand">
+      <img src="../../images/icon-mark-white.svg" alt="">
+      <div><b>LagOHM.</b><span>Yoga &amp; massage in Munich-Harlaching</span></div>
+    </div>
+    <div class="follow">Follow me here ↓</div>
+  </div>
+</section>
+
 <script>
   const brand = '<div class="brand"><i><img src="../../images/icon-mark-white.svg" alt=""></i><b>LagOHM<span>.</span></b></div>';
-  document.querySelectorAll('.slide').forEach(s => {
+  document.querySelectorAll('.slide:not(.story)').forEach(s => {
     const f = document.createElement('div');
     f.className = 'foot';
     f.innerHTML = brand + '<div>' + (s.dataset.foot || '') + '</div>';
