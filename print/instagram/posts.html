@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>LagOHM Instagram-Posts</title>
+<!-- Source for the Instagram feed posts (1080 × 1350, 4:5). One slide per ?v=<id>, e.g. ?v=logo-1.
+     Rendered to PNG with headless Edge: print/instagram/build-posts.ps1. Without ?v all slides are shown
+     side by side for review. Keep text inside the 3:4 grid crop: ~36 px are cut off left and right in the profile grid.
+     The footer (brand + data-foot text on the right) is added by the script at the bottom. -->
+<style>
+  @font-face{ font-family:'Fraunces'; font-style:normal; font-weight:400 600; src:url(../../fonts/fraunces-normal-latin.woff2) format('woff2'); }
+  @font-face{ font-family:'Fraunces'; font-style:italic; font-weight:500; src:url(../../fonts/fraunces-italic-latin.woff2) format('woff2'); }
+  @font-face{ font-family:'Manrope'; font-style:normal; font-weight:400 700; src:url(../../fonts/manrope-normal-latin.woff2) format('woff2'); }
+  :root{
+    --bg:#FBF4EF; --bg-card:#FBE5D3; --ink:#2B1B16; --ink-soft:#7C6459;
+    --accent-1:#C6432B; --accent-2:#EFA05E; --grad:linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    --serif:'Fraunces', Georgia, serif; --sans:'Manrope', 'Segoe UI', sans-serif;
+  }
+  html, body{ margin:0; padding:0; }
+  body.review{ background:#ddd; display:flex; flex-wrap:wrap; gap:40px; padding:40px; }
+  .slide{ width:1080px; height:1350px; position:relative; overflow:hidden; box-sizing:border-box;
+          font-family:var(--sans); color:var(--ink); background:var(--bg); }
+  .slide.grad{ background:var(--grad); color:#fff; }
+  .slide.card{ background:var(--bg-card); }
+
+  /* shared type */
+  .eyebrow{ font-family:var(--sans); font-weight:700; font-size:30px; letter-spacing:4px; text-transform:uppercase; color:var(--accent-1); }
+  .grad .eyebrow, .photo-full .eyebrow{ color:rgba(255,255,255,.85); }
+  h1, h2{ font-family:var(--serif); font-weight:600; letter-spacing:-1px; margin:0; line-height:1.04; }
+  h1{ font-size:112px; }
+  h2{ font-size:88px; }
+  h1 em, h2 em{ font-style:italic; font-weight:500; color:var(--accent-1); }
+  .grad h1 em, .grad h2 em, .photo-full h1 em, .photo-full h2 em{ color:#fff; }
+  p{ margin:0; font-size:38px; line-height:1.45; }
+  .text-only p{ font-size:42px; }
+  p strong{ font-weight:700; }
+  .grad p, .photo-full p{ color:rgba(255,255,255,.95); }
+
+  /* footer line with mark + name, on every slide */
+  .foot{ position:absolute; left:110px; right:110px; bottom:64px; display:flex; align-items:center; justify-content:space-between;
+         font-size:26px; font-weight:600; letter-spacing:.5px; color:var(--ink-soft); }
+  .grad .foot, .photo-full .foot{ color:rgba(255,255,255,.9); }
+  .foot .brand{ display:flex; align-items:center; gap:16px; font-family:var(--serif); font-size:34px; color:var(--ink); letter-spacing:-.5px; }
+  .grad .foot .brand, .photo-full .foot .brand{ color:#fff; }
+  .foot .brand i{ width:54px; height:54px; border-radius:14px; background:var(--grad); display:flex; align-items:center; justify-content:center; }
+  .grad .foot .brand i{ background:rgba(255,255,255,.18); }
+  .foot .brand i img{ width:32px; }
+  .foot .brand b{ font-weight:600; }
+  .foot .brand span{ color:var(--accent-1); }
+  .grad .foot .brand span, .photo-full .foot .brand span{ color:#fff; }
+
+  /* layout: cover (centred mark + headline on gradient) */
+  .cover{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 130px 120px; gap:44px; }
+  .cover .mark{ width:420px; margin-bottom:20px; }
+  .cover .icon{ width:260px; height:260px; border-radius:64px; background:rgba(255,255,255,.18); display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+  .cover .icon img{ width:168px; }
+
+  /* layout: photo on top, icon badge on the edge, text below */
+  .photo-top .photo{ position:absolute; left:0; top:0; width:100%; height:680px; object-fit:cover; }
+  .photo-top .badge{ position:absolute; left:110px; top:590px; width:180px; height:180px; border-radius:44px; background:var(--grad);
+                     display:flex; align-items:center; justify-content:center; box-shadow:0 14px 40px rgba(198,67,43,.28);
+                     font-family:var(--serif); font-size:96px; font-weight:500; font-style:italic; color:#fff; }
+  .photo-top .badge img{ width:116px; }
+  .photo-top .text{ position:absolute; left:110px; right:110px; top:820px; display:flex; flex-direction:column; gap:26px; }
+  .photo-top .text h2{ font-size:76px; }
+  /* taller photo, no badge (values post) */
+  .photo-top.tall .photo{ height:780px; }
+  .photo-top.tall .text{ top:870px; }
+
+  /* layout: full-bleed photo, dark fade at the bottom, white text on it */
+  .photo-full .photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .photo-full::after{ content:''; position:absolute; left:0; right:0; bottom:0; height:62%;
+                      background:linear-gradient(to bottom, rgba(43,27,22,0), rgba(43,27,22,.55) 45%, rgba(43,27,22,.82)); }
+  .photo-full .text{ position:absolute; left:110px; right:110px; bottom:190px; z-index:1; display:flex; flex-direction:column; gap:26px; color:#fff; }
+  .photo-full .foot{ z-index:1; }
+  /* variant: text at the top on a light fade (for photos whose subject sits low), dark fade only behind the footer */
+  .photo-full.top::after{ top:0; bottom:auto; height:46%;
+                          background:linear-gradient(to bottom, rgba(251,244,239,.94), rgba(251,244,239,.8) 55%, rgba(251,244,239,0)); }
+  .photo-full.top::before{ content:''; position:absolute; left:0; right:0; bottom:0; height:22%; z-index:1;
+                           background:linear-gradient(to top, rgba(43,27,22,.85), rgba(43,27,22,0)); }
+  .photo-full.top .text{ top:96px; bottom:auto; color:var(--ink); }
+  .photo-full.top .eyebrow{ color:var(--accent-1); }
+  .photo-full.top h2 em{ color:var(--accent-1); }
+  .photo-full.top p{ color:var(--ink); }
+
+  /* layout: text only (cream or apricot), vertically centred */
+  .text-only{ display:flex; flex-direction:column; justify-content:center; gap:40px; padding:0 110px 150px; }
+  .text-only h2{ font-size:80px; }
+  .text-only .list li{ font-size:42px; }
+  .text-only .icon-badge{ width:150px; height:150px; border-radius:40px; background:var(--grad); display:flex; align-items:center; justify-content:center; }
+  .text-only .icon-badge img{ width:96px; }
+
+  /* list with gradient check badges */
+  .list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:30px; }
+  .list li{ display:flex; align-items:flex-start; gap:30px; font-size:38px; line-height:1.38; }
+  .list li::before{ content:'✓'; flex:none; width:64px; height:64px; margin-top:-4px; border-radius:50%; background:var(--grad); color:#fff;
+                    display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:700; }
+  .list.num{ counter-reset:n; }
+  .list.num li::before{ counter-increment:n; content:counter(n); font-family:var(--serif); font-size:36px; font-weight:600; }
+  .list li strong{ font-weight:700; }
+
+  /* dictionary-style word slides (Lagom post) */
+  .word{ font-family:var(--serif); font-weight:600; font-size:200px; letter-spacing:-5px; line-height:.9; color:var(--ink); }
+  .word span{ color:var(--accent-1); }
+  .def{ font-family:var(--serif); font-style:italic; font-weight:500; font-size:44px; color:var(--ink-soft); margin-top:-10px; }
+  .rule{ width:120px; height:6px; border-radius:3px; background:var(--grad); }
+  .equation{ font-family:var(--serif); font-weight:600; font-size:104px; line-height:1.15; letter-spacing:-1px; }
+  .equation .plus{ font-style:italic; font-weight:500; opacity:.75; }
+
+  /* quote */
+  .quote{ font-family:var(--serif); font-style:italic; font-weight:500; font-size:96px; line-height:1.1; letter-spacing:-1px; color:var(--ink); }
+
+  .by{ font-size:30px; font-weight:700; letter-spacing:4px; text-transform:uppercase; color:var(--accent-1); }
+
+  /* price block */
+  .price{ display:flex; gap:28px; justify-content:center; align-items:baseline; font-family:var(--serif); }
+  .price .t{ font-size:60px; font-weight:500; font-style:italic; }
+  .price .sep{ font-size:60px; opacity:.6; }
+  .price .p{ font-size:120px; font-weight:600; letter-spacing:-2px; }
+  .pill{ display:inline-block; padding:22px 46px; border-radius:999px; background:#fff; color:var(--accent-1); font-size:34px; font-weight:700; }
+
+  /* gift voucher rows */
+  .rows{ display:flex; flex-direction:column; }
+  .rows div{ display:flex; justify-content:space-between; align-items:baseline; padding:14px 0; border-bottom:2px solid #E9D9CC; font-size:36px; }
+  .rows div:last-child{ border-bottom:0; }
+  .rows strong{ font-family:var(--serif); font-weight:600; font-size:42px; }
+
+  [hidden]{ display:none !important; }
+</style>
+</head>
+<body>
+
+<!-- ============ Post 1: Hallo, ich bin Helena (3 Slides) ============ -->
+<section class="slide photo-full" id="intro-1" data-foot="Wischen →">
+  <img class="photo" src="img/helena-portrait.jpg" alt="" style="object-position:50% 40%">
+  <div class="text">
+    <div class="eyebrow">Willkommen bei LagOHM</div>
+    <h1>Hallo, ich bin <em>Helena.</em></h1>
+  </div>
+</section>
+
+<section class="slide text-only" id="intro-2" data-foot="2 / 3">
+  <div class="eyebrow">Über mich</div>
+  <h2>In Schweden aufgewachsen, in München <em>zuhause.</em></h2>
+  <div class="rule"></div>
+  <p>Bewegung hat mich schon immer glücklich gemacht, aber es war Yoga, das mich durch dick und dünn begleitet hat.</p>
+  <p>Je digitaler und schneller die Welt wurde, desto mehr wünschte ich mir <strong>echte, achtsame Berührung</strong> und Zeit zum Durchatmen.</p>
+</section>
+
+<section class="slide card text-only" id="intro-3" data-foot="lagohm.de">
+  <div class="eyebrow">Ausgebildet in</div>
+  <ul class="list">
+    <li>Yin Yoga</li>
+    <li>Yoga-Therapie</li>
+    <li>Zen Shiatsu</li>
+    <li>Thai Yoga-Massage</li>
+  </ul>
+  <div class="rule"></div>
+  <p>Termine auf <strong>Deutsch, Englisch oder Schwedisch</strong>, ganz wie es dir am liebsten ist.</p>
+</section>
+
+<!-- ============ Post 2: Lagom trifft OM (4 Slides) ============ -->
+<section class="slide text-only" id="lagom-1" data-foot="Wischen →">
+  <div class="eyebrow">Woher kommt der Name?</div>
+  <div class="word">Lag<span>OHM</span></div>
+  <div class="rule"></div>
+  <p>Ein kleines Wortspiel aus dem Schwedischen und dem Yoga.</p>
+</section>
+
+<section class="slide card text-only" id="lagom-2" data-foot="2 / 4">
+  <div class="eyebrow">Schwedisch</div>
+  <div class="word">lagom</div>
+  <div class="def">genau richtig</div>
+  <div class="rule"></div>
+  <p>Nicht zu viel, nicht zu wenig. <em>Lagom</em> ist <strong>die Kunst des richtigen Maßes</strong>. Und das richtige Maß ist für jeden Körper und an jedem Tag ein anderes.</p>
+</section>
+
+<section class="slide text-only" id="lagom-3" data-foot="3 / 4">
+  <div class="eyebrow">Yoga</div>
+  <div class="word">OM</div>
+  <div class="def">der Klang des Yoga</div>
+  <div class="rule"></div>
+  <p>OM ist der Urklang im Yoga. Er wird gesungen, um still zu werden und ganz bei sich anzukommen.</p>
+</section>
+
+<section class="slide grad cover" id="lagom-4" data-foot="lagohm.de">
+  <div class="equation">lagom <span class="plus">+</span> OM<br><span class="plus">=</span> LagOHM.</div>
+  <p>Yoga und Massage im richtigen Maß.<br>Nicht zu viel, nicht zu wenig.</p>
+</section>
+
+<!-- ============ Post 3: Das Logo erklärt (4 Slides) ============ -->
+<section class="slide grad cover" id="logo-1" data-foot="Wischen →">
+  <img class="mark" src="../../images/icon-mark-white.svg" alt="">
+  <div class="eyebrow">Mein Logo</div>
+  <h1>Was steckt <em>dahinter?</em></h1>
+</section>
+
+<section class="slide photo-top" id="logo-2" data-foot="2 / 4">
+  <img class="photo" src="img/massage-kopf.jpg" alt="" style="object-position:50% 62%">
+  <div class="badge"><img src="../../images/icon-massage-white.svg" alt=""></div>
+  <div class="text">
+    <div class="eyebrow">Die Umarmung</div>
+    <h2 style="font-size:88px">steht für die <em>Massage.</em></h2>
+    <p>Achtsame Berührung, die hält und trägt. Sanfter Druck, ruhiger Atem, ein gleichmäßiger Rhythmus. Du darfst einfach loslassen.</p>
+  </div>
+</section>
+
+<section class="slide photo-top" id="logo-3" data-foot="3 / 4">
+  <img class="photo" src="img/yoga-sitz.jpg" alt="" style="object-position:50% 30%">
+  <div class="badge"><img src="../../images/icon-yoga-white.svg" alt=""></div>
+  <div class="text">
+    <div class="eyebrow">Die Waage</div>
+    <h2 style="font-size:88px">steht für <em>Yoga.</em></h2>
+    <p>Balance zwischen Kraft und Ruhe, Spannung und Entspannung. Ohne Leistungsdruck, im richtigen Maß für deinen Körper.</p>
+  </div>
+</section>
+
+<section class="slide grad cover" id="logo-4" data-foot="lagohm.de">
+  <img class="mark" src="../../images/icon-mark-white.svg" alt="">
+  <h2>Halt und Balance.<br><em>Einfach LagOHM.</em></h2>
+  <p>Massage und Yoga,<br>individuell auf dich abgestimmt.<br>Nicht zu viel, nicht zu wenig.</p>
+</section>
+
+<!-- ============ Post 4: Was dich erwartet – drei Werte (4 Slides) ============ -->
+<section class="slide grad cover" id="werte-1" data-foot="Wischen →">
+  <div class="eyebrow">Drei Dinge, die mir wichtig sind</div>
+  <h1>Was dich bei LagOHM <em>erwartet.</em></h1>
+</section>
+
+<section class="slide photo-top tall" id="werte-2" data-foot="2 / 4">
+  <img class="photo" src="img/massage-twist.jpg" alt="" style="object-position:50% 61%">
+  <div class="text">
+    <h2>Individuell. <em>Ganzheitlich.</em></h2>
+    <p>Ich verbinde Yoga, Thai Yoga-Massage und Shiatsu und stimme alles auf dich ab.</p>
+  </div>
+</section>
+
+<section class="slide photo-top tall" id="werte-3" data-foot="3 / 4">
+  <img class="photo" src="img/yoga-offen.jpg" alt="" style="object-position:50% 45%">
+  <div class="text">
+    <h2>Was <em>heute</em> zählt.</h2>
+    <p>Ich arbeite intuitiv. Jeder Termin richtet sich danach, was dein Körper gerade braucht.</p>
+  </div>
+</section>
+
+<section class="slide photo-top tall" id="werte-4" data-foot="4 / 4">
+  <img class="photo" src="img/buddha.jpg" alt="" style="object-position:50% 50%">
+  <div class="text">
+    <h2>Einfach <em>ankommen.</em></h2>
+    <p>In Ruhe und ohne Zeitdruck, damit du wirklich bei dir ankommen kannst.</p>
+  </div>
+</section>
+
+<!-- ============ Post 5: Massage (5 Slides) ============ -->
+<section class="slide photo-full" id="massage-1" data-foot="Wischen →">
+  <img class="photo" src="img/massage-knie.jpg" alt="" style="object-position:50% 50%">
+  <div class="text">
+    <div class="eyebrow">Angebot · Massage</div>
+    <h1>Ankommen &amp; <em>loslassen.</em></h1>
+  </div>
+</section>
+
+<section class="slide text-only" id="massage-2" data-foot="2 / 5">
+  <div class="icon-badge"><img src="../../images/icon-massage-white.svg" alt=""></div>
+  <h2>Im Kern geht es um dein <em>Nervensystem.</em></h2>
+  <p>Achtsame Körperarbeit aus Thai Yoga-Massage, Shiatsu und weiteren Techniken. Sanfte Berührung, ruhiger Atem und ein gleichmäßiger Rhythmus helfen dir, wieder ganz bei dir anzukommen.</p>
+  <p>Verspannte Muskeln profitieren mit. Vor allem aber darfst du <strong>tief entspannen</strong>.</p>
+</section>
+
+<section class="slide photo-full top" id="massage-3" data-foot="3 / 5">
+  <img class="photo" src="img/massage-ruecken.jpg" alt="" style="object-position:50% 0%">
+  <div class="text">
+    <div class="eyebrow">So läuft es ab</div>
+    <h2>Ohne festes <em>Schema.</em></h2>
+    <p>Bekleidet auf einer weichen Matte, mit Dehnung, Bewegung, Druck und Berührung.</p>
+  </div>
+</section>
+
+<section class="slide card text-only" id="massage-4" data-foot="4 / 5">
+  <div class="eyebrow">Gut zu wissen</div>
+  <ul class="list">
+    <li>Du bleibst vollständig angezogen, es wird kein Öl verwendet.</li>
+    <li>Du musst nichts tun und nicht flexibel sein. Du darfst einfach loslassen.</li>
+    <li>Es soll nicht wehtun. Intensität und Bewegung passe ich immer an dich an.</li>
+    <li>Bequeme, weiche Kleidung reicht völlig.</li>
+  </ul>
+</section>
+
+<section class="slide grad cover" id="massage-5" data-foot="lagohm.de">
+  <div class="icon"><img src="../../images/icon-massage-white.svg" alt=""></div>
+  <h2>Massage</h2>
+  <div class="price"><span class="t">90 Minuten</span><span class="sep">·</span><span class="p">120&nbsp;€</span></div>
+  <p>Auf Anfrage auch als Hausbesuch.</p>
+  <div class="pill">Termin buchen: Link in der Bio</div>
+</section>
+
+<!-- ============ Post 6: Yoga (4 Slides) ============ -->
+<section class="slide photo-full" id="yoga-1" data-foot="Wischen →">
+  <img class="photo" src="img/yoga-baum.jpg" alt="" style="object-position:50% 30%">
+  <div class="text">
+    <div class="eyebrow">Angebot · Yoga</div>
+    <h1>Yoga, ganz <em>für dich.</em></h1>
+  </div>
+</section>
+
+<section class="slide photo-top" id="yoga-2" data-foot="2 / 4">
+  <img class="photo" src="img/yoga-ausfallschritt.jpg" alt="" style="object-position:50% 60%">
+  <div class="badge"><img src="../../images/icon-yoga-white.svg" alt=""></div>
+  <div class="text">
+    <div class="eyebrow">Mein Schwerpunkt</div>
+    <h2>Yin Yoga &amp; <em>Yoga-Therapie.</em></h2>
+    <p>Atem, achtsame Bewegung und länger gehaltene Positionen helfen dir, deinen Körper bewusster wahrzunehmen und Spannungen loszulassen.</p>
+  </div>
+</section>
+
+<section class="slide card text-only" id="yoga-3" data-foot="3 / 4">
+  <div class="eyebrow">Einzelunterricht</div>
+  <h2>Jeder Termin entsteht aus dem, was du <em>mitbringst.</em></h2>
+  <ul class="list">
+    <li>Sanfte Mobilisation</li>
+    <li>Stabilität und Beweglichkeit</li>
+    <li>Hatha- und Vinyasa-Elemente</li>
+    <li>Ohne Leistungsdruck</li>
+  </ul>
+</section>
+
+<section class="slide grad cover" id="yoga-4" data-foot="lagohm.de">
+  <div class="icon"><img src="../../images/icon-yoga-white.svg" alt=""></div>
+  <h2>Private Yoga Session</h2>
+  <div class="price"><span class="t">75 Minuten</span><span class="sep">·</span><span class="p">75&nbsp;€</span></div>
+  <p>Auf Anfrage auch als Hausbesuch.</p>
+  <div class="pill">Termin buchen: Link in der Bio</div>
+</section>
+
+<!-- ============ Post 7: So arbeite ich (3 Slides) ============ -->
+<section class="slide text-only" id="arbeit-1" data-foot="Wischen →">
+  <div class="eyebrow">So arbeite ich</div>
+  <div class="rule"></div>
+  <div class="quote">„Wenn ich arbeite, verschwinden Zeit und Raum.“</div>
+  <div class="by">Helena</div>
+</section>
+
+<section class="slide photo-top" id="arbeit-2" data-foot="2 / 3">
+  <img class="photo" src="img/massage-lachen.jpg" alt="" style="object-position:50% 30%">
+  <div class="badge"><img src="../../images/icon-mark-white.svg" alt="" style="width:120px"></div>
+  <div class="text">
+    <div class="eyebrow">Alles ist Energie</div>
+    <h2>Ins <em>Fließen</em> kommen.</h2>
+    <p>Wenn Energie frei fließen kann, entsteht Raum für Balance. Ich spüre, was dein Körper gerade braucht, und begleite ihn dabei.</p>
+  </div>
+</section>
+
+<section class="slide grad cover" id="arbeit-3" data-foot="3 / 3">
+  <div class="eyebrow">Das schönste Kompliment</div>
+  <h2>Ein Klient konnte nach seiner Behandlung zum ersten Mal seit langer Zeit wieder <em>durchschlafen.</em></h2>
+  <p>Meine Arbeit empfinde ich wie eine gemeinsame, friedliche Meditation.</p>
+</section>
+
+<!-- ============ Post 8: Für wen? (1 Bild) ============ -->
+<section class="slide card text-only" id="fuerwen-1" data-foot="lagohm.de">
+  <div class="eyebrow">Für wen?</div>
+  <h2>Loslassen. Spüren.<br><em>Bei dir sein.</em></h2>
+  <p>LagOHM ist für dich, wenn du …</p>
+  <ul class="list num">
+    <li><span>viel sitzt, dich wieder beweglicher fühlen und Verspannungen <strong>loslassen</strong> möchtest.</span></li>
+    <li><span>schon lange nicht mehr richtig durchschläfst und dich endlich wieder <strong>spüren</strong> willst.</span></li>
+    <li><span>im digitalen Alltag einfach wieder <strong>bei dir sein</strong> möchtest, ganz ohne Leistungsdruck.</span></li>
+  </ul>
+</section>
+
+<!-- ============ Post 9: Der Raum, Gutscheine, Termin buchen (4 Slides) ============ -->
+<section class="slide photo-full" id="raum-1" data-foot="Wischen →">
+  <img class="photo" src="img/raum.jpg" alt="" style="object-position:50% 50%">
+  <div class="text">
+    <div class="eyebrow">München-Harlaching</div>
+    <h1>Ein ruhiger Raum, <em>nur für dich.</em></h1>
+  </div>
+</section>
+
+<section class="slide text-only" id="raum-2" data-foot="2 / 4">
+  <div class="eyebrow">Wo und wie</div>
+  <h2>In Ruhe und ohne <em>Zeitdruck.</em></h2>
+  <ul class="list">
+    <li>Privater Raum in München-Harlaching. Die genaue Adresse bekommst du mit der Terminbestätigung.</li>
+    <li>Auf Anfrage komme ich auch zu dir nach Hause, in und um München.</li>
+    <li>Bezahlen kannst du bar oder per Überweisung.</li>
+  </ul>
+</section>
+
+<section class="slide photo-top" id="raum-3" data-foot="3 / 4">
+  <img class="photo" src="img/herzen.jpg" alt="" style="object-position:50% 30%">
+  <div class="text" style="top:740px">
+    <div class="eyebrow">Gutscheine</div>
+    <h2>Zeit für dich <em>verschenken.</em></h2>
+    <div class="rows">
+      <div><span>Massage · 90 Min.</span><strong>120&nbsp;€</strong></div>
+      <div><span>Private Yoga Session · 75 Min.</span><strong>75&nbsp;€</strong></div>
+      <div><span>Wertgutschein</span><strong>ab 75&nbsp;€</strong></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide grad cover" id="raum-4" data-foot="lagohm.de">
+  <img class="mark" src="../../images/icon-mark-white.svg" alt="" style="width:300px">
+  <h2>Bereit für deinen <em>Termin?</em></h2>
+  <p>Angebot wählen, freien Termin aussuchen und online buchen. Die Bestätigung kommt sofort.</p>
+  <div class="pill">Link in der Bio</div>
+</section>
+
+<script>
+  const brand = '<div class="brand"><i><img src="../../images/icon-mark-white.svg" alt=""></i><b>LagOHM<span>.</span></b></div>';
+  document.querySelectorAll('.slide').forEach(s => {
+    const f = document.createElement('div');
+    f.className = 'foot';
+    f.innerHTML = brand + '<div>' + (s.dataset.foot || '') + '</div>';
+    s.appendChild(f);
+  });
+  const v = new URLSearchParams(location.search).get('v');
+  if (v) document.querySelectorAll('.slide').forEach(s => s.hidden = s.id !== v);
+  else document.body.classList.add('review');
+</script>
+</body>
+</html>
