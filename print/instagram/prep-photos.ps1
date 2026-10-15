@@ -18,7 +18,9 @@ $photos = @(
   @('Fotos\Massage\IMG_6174.JPG',             'herzen.jpg'),
   @('Fotos\Massage\retuschiert\IMG_6206.jpg', 'massage-lachen.jpg'),
   @('Fotos\Yoga\IMG_6284.JPG',                'yoga-offen.jpg'),
-  @('Fotos\Yoga\IMG_6254.JPG',                'yoga-ausfallschritt.jpg')
+  @('Fotos\Yoga\IMG_6254.JPG',                'yoga-ausfallschritt.jpg'),
+  @('Fotos\Yoga\IMG_6178.JPG',                'matte.jpg'),
+  @('Fotos\Yoga\IMG_6302.JPG',                'yoga-meditation.jpg')
 )
 $codec = [System.Drawing.Imaging.ImageCodecInfo]::GetImageEncoders() | Where-Object { $_.MimeType -eq 'image/jpeg' }
 $params = New-Object System.Drawing.Imaging.EncoderParameters 1

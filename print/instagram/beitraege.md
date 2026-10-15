@@ -4,20 +4,43 @@ Format: 1080 × 1350 px (4:5), Karussells mit 1–5 Slides.
 Vorlage: `posts.html`. PNGs erzeugen: `build-posts.ps1` → `out/<nr>-<post>/`.
 Fotos aus `Fotos/` vorbereiten: `prep-photos.ps1` → `img/`. Raster-Vorschau: `build-feed-preview.ps1` → `out/feed-vorschau.png`.
 
-## Reihenfolge beim Posten
+## Reihenfolge beim Posten und Pins
 
-Instagram zeigt den neuesten Post oben links. Damit das Raster so aussieht wie in `out/feed-vorschau.png`,
-**von hinten nach vorn posten: zuerst 09, zuletzt 01.** Danach 01–03 im Profil anpinnen.
+Oben im Profil stehen drei angeheftete Posts (Pins): **01 Helena · 05 Massage · 06 Yoga**, also wer du bist,
+was du anbietest und wie man bucht. Darunter folgen die übrigen sechs, der neueste oben links.
+So sieht es aus: `out/feed-vorschau.png`.
+
+**Posting-Reihenfolge (von alt nach neu):**
+
+1. 02 Lagom trifft OM
+2. 04 Was dich erwartet
+3. 03 Mein Logo
+4. 07 So arbeite ich
+5. 08 Für wen?
+6. 09 Raum, Gutscheine, Termin
+7. 06 Yoga
+8. 05 Massage
+9. 01 Hallo, ich bin Helena
+
+**Anheften:** zuerst 06, dann 05, zuletzt 01 (der zuletzt angeheftete Post steht ganz links). Falls die Reihenfolge
+anders aussieht: Pins lösen und neu anheften, das geht jederzeit.
+
+**Tempo:** nicht alle an einem Tag. Die ersten 3–4 innerhalb weniger Tage, den Rest über 2–3 Wochen.
+Zum Schluss die drei Pin-Posts, dann steht die erste Reihe von Anfang an richtig.
+
+**Später:** Jeder neue Post schiebt das Raster unter den Pins um eine Stelle weiter. Als Faustregel etwa 2 von 3 Posts
+mit einem echten Foto beginnen und nie zweimal hintereinander denselben Typ (Foto, Text, Verlauf) posten.
+
 Beim Hochladen alle PNGs eines Ordners in der Reihenfolge 1, 2, 3 … als Karussell auswählen.
 
 | Nr. | Ordner | Post | Slides | Highlight später |
 |---|---|---|---|---|
-| 01 | `01-intro` | Hallo, ich bin Helena | 3 | Über mich |
+| 01 | `01-intro` | Hallo, ich bin Helena (Pin) | 3 | Über mich |
 | 02 | `02-lagom` | Lagom trifft OM | 4 | Über mich |
 | 03 | `03-logo` | Mein Logo | 4 | Über mich |
 | 04 | `04-werte` | Was dich erwartet | 4 | Über mich |
-| 05 | `05-massage` | Massage | 5 | Massage |
-| 06 | `06-yoga` | Yoga | 4 | Yoga |
+| 05 | `05-massage` | Massage (Pin) | 5 | Massage |
+| 06 | `06-yoga` | Yoga (Pin) | 4 | Yoga |
 | 07 | `07-arbeit` | So arbeite ich | 3 | Über mich |
 | 08 | `08-fuerwen` | Für wen? | 1 | Massage, Yoga |
 | 09 | `09-raum` | Raum, Gutscheine, Termin | 4 | Massage, Yoga |
