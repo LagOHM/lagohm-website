@@ -343,6 +343,53 @@ a{ color: inherit; text-decoration: none; }
   font-size:.82rem; color: var(--ink-soft);
 }
 
+/* Company page (firmen.html / en/companies.html): alternating photo + copy rows */
+.main-nav a.active{ color: var(--accent-1); }
+.biz-offers{ border-top:1px solid var(--line); position: relative; overflow: clip; }
+.biz-offer{
+  display:grid; grid-template-columns: .9fr 1.2fr; gap: 56px; align-items:center;
+  padding: 64px 0; border-bottom:1px solid var(--line); scroll-margin-top: 78px;
+}
+.biz-offer:last-child{ border-bottom: 0; }
+.biz-offer--alt .biz-offer-photo{ order: 2; }
+.biz-offer-photo{
+  width:100%; aspect-ratio: 4/5; object-fit: cover; object-position: top;
+  border-radius: var(--radius); box-shadow: 0 30px 60px -30px rgba(43,27,22,.35);
+}
+.biz-offer-copy p{ max-width: 56ch; }
+.biz-offer-sub{ font-family: var(--serif); font-style: italic; font-size: 1.08rem; color: var(--ink); }
+.biz-badge{
+  width:64px; height:64px; border-radius:16px; background: var(--grad);
+  display:flex; align-items:center; justify-content:center; margin-bottom: 20px;
+}
+.biz-badge img{ width:36px; height:36px; display:block; }
+.biz-offer-copy strong{ color: var(--ink); font-weight: 700; }
+.biz-cta-section{ padding: 64px 0 76px; border-top:1px solid var(--line); scroll-margin-top: 78px; position: relative; overflow: clip; }
+.biz-cta-section > .wrap{ position: relative; z-index: 1; }
+.biz-cta-section::before{
+  content:""; position:absolute; z-index:0; pointer-events:none;
+  background: var(--accent-1); opacity:.045;
+  -webkit-mask: url(../images/icon-mark-white.svg) center / contain no-repeat; mask: url(../images/icon-mark-white.svg) center / contain no-repeat;
+  width:260px; height:225px; right:6%; top:60px;
+}
+.biz-cta-section .gift-card p:first-child{ margin-bottom: 22px; }
+/* Teaser on the homepage */
+.biz-teaser{ padding: 56px 0; border-top:1px solid var(--line); }
+.biz-teaser-inner{
+  display:flex; align-items:center; justify-content:space-between; gap: 32px;
+  background: var(--bg-card); border:1px solid var(--line); border-radius: var(--radius); padding: 32px 36px;
+}
+.biz-teaser-inner h2{ margin-bottom: 8px; }
+.biz-teaser-inner p{ margin: 0; max-width: 56ch; }
+.biz-teaser-inner .btn{ flex: none; }
+@media (max-width: 860px){
+  .biz-offer, .biz-offer--alt{ grid-template-columns: 1fr; gap: 28px; padding: 48px 0; }
+  .biz-offer--alt .biz-offer-photo{ order: 0; }
+  .biz-offer-photo{ max-width: 380px; margin: 0 auto; }
+  .biz-teaser-inner{ flex-direction: column; align-items:flex-start; padding: 26px 22px; }
+  .biz-cta-section::before{ width:170px; height:147px; right:-30px; top:30px; }
+}
+
 /* Legal pages */
 .legal-page{ padding: 64px 0 90px; }
 .legal-page h1{ font-size: 2rem; margin-bottom: 28px; }
