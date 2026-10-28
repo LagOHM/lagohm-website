@@ -109,7 +109,7 @@ VALUES
 
 INSERT INTO app_settings (setting_key, setting_value) VALUES
   ('slot_granularity_minutes', '15'),
-  ('min_lead_hours', '3'),
+  ('min_lead_hours', '24'),
   ('max_horizon_days', '60'),
   ('reminder_hours_before', '24')
 ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value);

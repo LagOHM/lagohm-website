@@ -81,6 +81,12 @@ function lagohm_migrate(PDO $pdo): void
             $pdo->exec("UPDATE services SET price_cents = 7500 WHERE slug = 'yoga' AND price_cents = 6000");
             $pdo->exec("INSERT INTO app_settings (setting_key, setting_value) VALUES ('migration_yoga_price_7500', '1')");
         }
+        // One-time change (October 2026): booking lead time 3 h -> 24 h. Later changes are made
+        // in Admin -> Einstellungen and are not overwritten.
+        if (!$pdo->query("SELECT 1 FROM app_settings WHERE setting_key = 'migration_lead_24h'")->fetch()) {
+            $pdo->exec("UPDATE app_settings SET setting_value = '24' WHERE setting_key = 'min_lead_hours' AND setting_value = '3'");
+            $pdo->exec("INSERT INTO app_settings (setting_key, setting_value) VALUES ('migration_lead_24h', '1')");
+        }
     } catch (Throwable $e) {
         // Tables not created yet (fresh install) — sql/schema.sql has the column.
     }

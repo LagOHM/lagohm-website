@@ -34,7 +34,7 @@ final class Availability
         $weekday = (int)$date->format('w');
 
         $granularity = (int)(lagohm_setting('slot_granularity_minutes', '15'));
-        $minLeadHours = (int)(lagohm_setting('min_lead_hours', '3'));
+        $minLeadHours = (int)(lagohm_setting('min_lead_hours', '24'));
         $maxHorizonDays = (int)(lagohm_setting('max_horizon_days', '60'));
 
         $now = new DateTime('now', $tz);
@@ -82,7 +82,7 @@ final class Availability
     public static function isSlotStillAvailable(PDO $pdo, array $service, DateTime $start, DateTime $end): bool
     {
         $tz = $start->getTimezone();
-        $minLeadHours = (int)(lagohm_setting('min_lead_hours', '3'));
+        $minLeadHours = (int)(lagohm_setting('min_lead_hours', '24'));
         $now = new DateTime('now', $tz);
         if ($start < (clone $now)->modify("+{$minLeadHours} hours")) {
             return false;

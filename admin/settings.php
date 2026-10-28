@@ -26,6 +26,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $save->execute(['address_hint', mb_substr($addressHint, 0, 255)]);
         $save->execute(['address_hint_en', mb_substr($addressHintEn, 0, 255)]);
         $message = ($addressHint === '' && $addressHintEn === '') ? 'Hinweis entfernt.' : 'Hinweis gespeichert.';
+    } elseif (isset($_POST['lead_time_form'])) {
+        $leadHours = max(0, min(168, (int)($_POST['min_lead_hours'] ?? 24)));
+        lagohm_db()->prepare('INSERT INTO app_settings (setting_key, setting_value) VALUES ("min_lead_hours", ?)
+            ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)')->execute([(string)$leadHours]);
+        $message = 'Vorlaufzeit gespeichert: ' . $leadHours . ' Stunden.';
     } else {
         $config['smtp']['user'] = trim((string)($_POST['smtp_user'] ?? $config['smtp']['user']));
         $config['smtp']['from_email'] = trim((string)($_POST['smtp_from_email'] ?? $config['smtp']['from_email']));
@@ -128,6 +133,18 @@ header('Content-Type: text/html; charset=utf-8');
     </label>
     <br><br>
     <button type="submit" class="btn btn-primary">Hinweis speichern</button>
+  </form>
+
+  <h1 style="margin-top:48px;">Vorlaufzeit für Buchungen</h1>
+  <p class="admin-note">So viele Stunden vor Terminbeginn muss spätestens gebucht werden. Bei 24 Stunden kann zum Beispiel heute um 22 Uhr frühestens ein Termin ab morgen 22 Uhr gebucht werden.</p>
+  <form method="post" style="max-width:480px;">
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Csrf::token(), ENT_QUOTES, 'UTF-8') ?>">
+    <input type="hidden" name="lead_time_form" value="1">
+    <label>Stunden Vorlauf (0 bis 168)<br>
+      <input type="number" name="min_lead_hours" min="0" max="168" step="1" value="<?= (int)($leadHours ?? lagohm_setting('min_lead_hours', '24')) ?>">
+    </label>
+    <br><br>
+    <button type="submit" class="btn btn-primary">Vorlaufzeit speichern</button>
   </form>
 </main>
 </body>
