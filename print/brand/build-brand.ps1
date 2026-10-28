@@ -11,6 +11,7 @@ $jobs = @(
   @('sig-text', 'lagohm-signatur.png',        1000,  400, 2),
   @('hl-massage',  'lagohm-highlight-massage.png',  1080, 1920, 1),
   @('hl-yoga',     'lagohm-highlight-yoga.png',     1080, 1920, 1),
+  @('hl-firmen',   'lagohm-highlight-firmen.png',   1080, 1920, 1),
   @('bg-story',    'lagohm-hintergrund-story-1080x1920.png',    1080, 1920, 1),
   @('bg-square',   'lagohm-hintergrund-quadrat-1080x1080.png',  1080, 1080, 1),
   @('bg-portrait', 'lagohm-hintergrund-hochformat-1080x1350.png', 1080, 1350, 1)

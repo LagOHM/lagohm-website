@@ -163,3 +163,61 @@ Hashtag-Grundstock (pro Post 8–12 auswählen):
 > Angebot wählen, freien Termin aussuchen und online buchen: Link in der Bio. Fragen? Schreib mir einfach eine Nachricht.
 >
 > #LagOHM #MassageMünchen #YogaMünchen #MünchenHarlaching #Gutschein #Geschenkidee #Hausbesuch #Auszeit #Entspannung
+
+---
+
+# Für Firmen (Oktober 2026)
+
+Drei Karussells, eine Story mit Link und ein Highlight „Firmen“. Zur Firmenseite: https://lagohm.de/firmen.html
+
+## Vorher: Link in der Bio ergänzen
+
+Instagram → Profil bearbeiten → Links → **Externen Link hinzufügen**:
+URL `https://lagohm.de/firmen.html`, Titel `Für Firmen`. Der bisherige Link zu lagohm.de bleibt.
+
+## Reihenfolge
+
+1. **12 Massage im Büro** (`12-firmenmassage`, 3 Slides)
+2. **13 Betriebsyoga** (`13-firmenyoga`, 3 Slides), ein paar Tage später
+3. **14 Massage-Workshop** (`14-firmenworkshop`, 4 Slides), wieder ein paar Tage später
+4. **Story** (`15-firmenstory/firmenstory-1.png`): in der Instagram-App einen **Link-Sticker** mit `https://lagohm.de/firmen.html` in die freie Fläche unter „Mehr erfahren“ setzen. Danach die Story als Highlight speichern: Highlight **„Firmen“**, Cover `images/brand/lagohm-highlight-firmen.png`.
+
+Foto, Verlauf, Foto: so stehen nie zwei gleiche Typen nebeneinander. Die Pins bleiben wie sie sind.
+
+## 12 – Massage im Büro
+
+> Massage im Büro. 🧡
+>
+> Ich komme mit Matte zu euch und massiere eure Mitarbeitenden direkt im Unternehmen. Es ist dieselbe Massage wie in meinem Einzelangebot: achtsame Körperarbeit aus Thai Yoga-Massage, Shiatsu und weiteren Techniken. Im Kern geht es um das Nervensystem, im Mittelpunkt steht tiefe Entspannung.
+>
+> Alle bleiben bekleidet und liegen auf einer weichen Matte am Boden. Nach viel Homeoffice ist ein Massagetag ein schöner Grund, wieder gemeinsam ins Büro zu kommen.
+>
+> Angebot anfragen: Link in der Bio → Für Firmen
+>
+> #LagOHM #MassageAmArbeitsplatz #FirmenMassage #BetrieblicheGesundheitsförderung #Mitarbeitergesundheit #MassageMünchen #ThaiYogaMassage #Shiatsu #München #Team
+
+## 13 – Betriebsyoga
+
+> Betriebsyoga bei euch im Büro. 🧘‍♀️
+>
+> Wer viel sitzt, spürt das irgendwann in Nacken und Rücken. Eine Yogastunde bringt Bewegung in den Arbeitstag, der Atem wird ruhiger und der Kopf klarer. Danach geht man entspannter zurück an den Schreibtisch.
+>
+> Regelmäßig im Büro, zum Beispiel einmal pro Woche, oder als besonderer Programmpunkt bei eurem Teamtag oder Firmenevent. Ich stimme die Stunden auf die Gruppe ab, Vorkenntnisse braucht niemand. Auf Wunsch geht es auch online, am schönsten ist es aber gemeinsam vor Ort.
+>
+> Angebot anfragen: Link in der Bio → Für Firmen
+>
+> #LagOHM #Betriebsyoga #YogaImBüro #FirmenYoga #BetrieblicheGesundheitsförderung #Teamevent #Firmenevent #YogaMünchen #YinYoga #München
+
+## 14 – Massage-Workshop für Teams
+
+> Thai Yoga Massage zu zweit: ein Workshop für Teams. 🤝
+>
+> Wir bilden Zweierteams, und ich leite euch Schritt für Schritt durch die Thai Yoga Massage. Ihr wechselt euch auf der Matte ab, so erlebt jede und jeder das Geben und das Empfangen. Ich zeige die einzelnen Griffe und Bewegungen und begleite euch durch die Praxis.
+>
+> Dabei geht es vor allem ums Spüren und um achtsame Berührung. Der Körper kommt zur Ruhe, der Parasympathikus schaltet auf Erholung, und ganz nebenbei erlebt ihr euch als Team von einer neuen Seite.
+>
+> Vorkenntnisse braucht ihr keine, nur bequeme Kleidung und frische Socken.
+>
+> Angebot anfragen: Link in der Bio → Für Firmen
+>
+> #LagOHM #Teamevent #Teambuilding #Workshop #ThaiYogaMassage #MassageWorkshop #Firmenevent #BetrieblicheGesundheitsförderung #MassageMünchen #München

@@ -9,8 +9,9 @@ $page = 'file:///' + (Join-Path $PSScriptRoot 'posts.html').Replace([char]92, [c
 $posts = [ordered]@{
   'intro' = 3; 'lagom' = 4; 'logo' = 4; 'werte' = 4; 'massage' = 5; 'yoga' = 4; 'arbeit' = 3; 'fuerwen' = 1; 'raum' = 4
   'privatpost' = 2; 'privatstory' = 1   # for Helena's private account (English)
+  'firmenmassage' = 3; 'firmenyoga' = 3; 'firmenworkshop' = 4; 'firmenstory' = 1   # companies (Firmenseite)
 }
-$heights = @{ 'privatstory' = 1920 }      # story format; everything else is 1350
+$heights = @{ 'privatstory' = 1920; 'firmenstory' = 1920 }      # story format; everything else is 1350
 $nr = 0
 foreach ($post in $posts.Keys) {
   $nr++

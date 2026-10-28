@@ -3,7 +3,7 @@
 #   powershell -ExecutionPolicy Bypass -File print/instagram/build-feed-preview.ps1
 Add-Type -AssemblyName System.Drawing
 $pinned = @('01-intro', '05-massage', '06-yoga')
-$grid   = @('09-raum', '08-fuerwen', '07-arbeit', '03-logo', '04-werte', '02-lagom')   # newest first
+$grid   = @('14-firmenworkshop', '13-firmenyoga', '12-firmenmassage', '09-raum', '08-fuerwen', '07-arbeit', '03-logo', '04-werte', '02-lagom')   # newest first
 $w = 360; $h = 480; $gap = 4; $pinGap = 24
 $rows = 1 + [math]::Ceiling($grid.Count / 3)
 $sheet = New-Object System.Drawing.Bitmap (3 * $w + 2 * $gap), ($rows * $h + ($rows - 2) * $gap + $pinGap)
